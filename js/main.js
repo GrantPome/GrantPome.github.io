@@ -21,12 +21,13 @@
 
     // 动画序列时间节点（相对于聚集完成时间）
     const SEQ = {
-      bgSharpen: 0,          // 背景从模糊变清晰（聚集完成立刻开始）
-      overlayFadeIn: 700,    // 黑色遮罩淡入
-      canvasFadeOut: 900,    // 粒子画布淡出
-      avatarIn: 1100,        // 头像淡入
-      navbarIn: 1300,        // 导航栏淡入
-      contentIn: 1500,       // 其余内容淡入
+      bgBlurIn: 0,          // 所有粒子集齐后，模糊背景淡入
+      bgSharpen: 300,       // 背景从模糊变清晰（延迟，让用户先看到模糊态）
+      overlayFadeIn: 800,   // 黑色遮罩淡入
+      canvasFadeOut: 1000,  // 粒子画布淡出
+      avatarIn: 1200,       // 头像淡入
+      navbarIn: 1400,       // 导航栏淡入
+      contentIn: 1600,      // 其余内容淡入
     };
 
     let particles = [];
@@ -175,7 +176,10 @@
     function runSequence() {
       sequenceStarted = true;
 
-      // 序列 1：背景从模糊变清晰
+      // 序列 0：所有粒子集齐后，模糊背景淡入
+      heroBg.classList.add("blur-in");
+
+      // 序列 1：背景从模糊变清晰（延迟，让用户先看到模糊态）
       setTimeout(() => {
         heroBg.classList.add("sharpen");
       }, SEQ.bgSharpen);
@@ -262,13 +266,6 @@
         }
 
         ctx.globalAlpha = 1;
-
-        // 粒子聚集达到 80% 时，模糊背景淡入
-        const overallProgress = doneCount / particles.length;
-        if (!blurTriggered && overallProgress > 0.8) {
-          blurTriggered = true;
-          heroBg.classList.add("blur-in");
-        }
 
         if (doneCount === particles.length) {
           allDone = true;
@@ -640,21 +637,15 @@
     const openWork = () => {
       const rect = card.getBoundingClientRect();
       activeCard = card;
-      // 禁用交互但保持可见，让动画连贯
       card.style.pointerEvents = "none";
-      // 停止3D动画循环，但保留当前transform状态
       isHovering = false;
       if (rafId3d) {
         cancelAnimationFrame(rafId3d);
         rafId3d = null;
       }
-      // 0.3s 后卡片逐渐消失
-      card.style.transition = "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1)";
-      setTimeout(() => {
-        if (activeCard === card) {
-          card.style.opacity = "0";
-        }
-      }, 300);
+      // 立即隐藏卡片，让弹窗从卡片位置无缝接管视觉
+      card.style.transition = "none";
+      card.style.opacity = "0";
       openModal(w, rect, currentX, currentY);
     };
 
@@ -769,18 +760,18 @@
 
         modalContent.style.transform = `translate3d(${startX}px, ${startY}px, 0) scale(${startScale}) perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
         modalContent.style.opacity = "0";
-        modalContent.style.borderRadius = "12px";
+        modalContent.style.borderRadius = "16px";
         modalBody.style.opacity = "0";
         modalBackdrop.style.opacity = "0";
 
         // 强制回流
         modalContent.offsetWidth;
 
-        // 终态 — 连贯流畅的共享元素动画
+        // 终态 — 卡片放大移至中央的连贯共享元素动画
         modal.style.opacity = "1";
         modalContent.style.transition =
-          "transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1), " +
-          "opacity 250ms cubic-bezier(0.16, 1, 0.3, 1), " +
+          "transform 600ms cubic-bezier(0.22, 1, 0.36, 1), " +
+          "opacity 200ms cubic-bezier(0.22, 1, 0.36, 1), " +
           "border-radius 500ms cubic-bezier(0.22, 1, 0.36, 1)";
         modalBackdrop.style.transition = "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1)";
         modalBody.style.transition = "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1) 200ms";
@@ -823,11 +814,6 @@
 
     document.removeEventListener("keydown", trapFocus);
 
-    // 先显示原卡片，让飞回动画连贯
-    if (activeCard) {
-      activeCard.style.opacity = "";
-    }
-
     // 安全检查：来源位置是否在合理范围内
     const targetRect = modalContent.getBoundingClientRect();
     const vw = window.innerWidth;
@@ -860,14 +846,14 @@
 
     requestAnimationFrame(() => {
       modalContent.style.transition =
-        "transform 500ms cubic-bezier(0.4, 0, 0.2, 1), " +
+        "transform 500ms cubic-bezier(0.22, 1, 0.36, 1), " +
         "opacity 300ms cubic-bezier(0.4, 0, 1, 1), " +
-        "border-radius 300ms ease";
+        "border-radius 300ms cubic-bezier(0.22, 1, 0.36, 1)";
       modalBackdrop.style.transition = "opacity 350ms cubic-bezier(0.4, 0, 1, 1)";
 
       modalContent.style.transform = `translate3d(${endX}px, ${endY}px, 0) scale(${endScale})`;
       modalContent.style.opacity = "0";
-      modalContent.style.borderRadius = "12px";
+      modalContent.style.borderRadius = "16px";
       modalBackdrop.style.opacity = "0";
     });
 
@@ -894,11 +880,16 @@
     originRect = null;
     isAnimating = false;
 
-    // 恢复原卡片显示
+    // 恢复原卡片显示（平滑淡入）
     if (activeCard) {
-      activeCard.style.opacity = "";
-      activeCard.style.pointerEvents = "";
-      activeCard.style.transition = "";
+      const cardRef = activeCard;
+      cardRef.style.transition = "opacity 300ms cubic-bezier(0.22, 1, 0.36, 1)";
+      cardRef.style.opacity = "1";
+      cardRef.style.pointerEvents = "";
+      setTimeout(() => {
+        cardRef.style.transition = "";
+        cardRef.style.opacity = "";
+      }, 320);
       activeCard = null;
     }
 
