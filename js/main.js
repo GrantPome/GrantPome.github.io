@@ -1,6 +1,184 @@
-// 主入口：视差滚动 · 导航效果 · 入场动画 · 作品集渲染 · 弹窗 · 卡片光晕 · 无障碍
+// 主入口：粒子聚集 · 视差滚动 · 导航效果 · 入场动画 · 作品集渲染 · 弹窗 · 卡片光晕 · 无障碍
 (function () {
   "use strict";
+
+  // ---------- Hero 粒子聚集成像特效 ----------
+  (function () {
+    const canvas = document.getElementById("hero-particles");
+    const heroBg = document.querySelector(".hero-bg");
+    if (!canvas || !heroBg) return;
+
+    const ctx = canvas.getContext("2d");
+    const IMG_SRC = "assets/wallpaper.png";
+    const SAMPLE_STEP = 4; // 采样间隔，越小粒子越多
+    const DURATION = 1800; // 动画总时长 ms
+    const DELAY_RANGE = 600; // 粒子延迟分散范围 ms
+
+    let particles = [];
+    let startTime = 0;
+    let animationId = null;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const resizeCanvas = () => {
+      const hero = canvas.parentElement;
+      const rect = hero.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + "px";
+      canvas.style.height = rect.height + "px";
+      ctx.scale(dpr, dpr);
+    };
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      resizeCanvas();
+      initParticles(img);
+      startTime = performance.now();
+      animate();
+    };
+    img.src = IMG_SRC;
+
+    function initParticles(imgEl) {
+      particles = [];
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+
+      // 用离屏 canvas 采样图片像素
+      const offscreen = document.createElement("canvas");
+      const offCtx = offscreen.getContext("2d");
+
+      // 按 cover 模式计算绘制尺寸
+      const imgRatio = imgEl.width / imgEl.height;
+      const canvasRatio = w / h;
+      let drawW, drawH, drawX, drawY;
+
+      if (imgRatio > canvasRatio) {
+        drawH = h;
+        drawW = h * imgRatio;
+        drawX = (w - drawW) / 2;
+        drawY = 0;
+      } else {
+        drawW = w;
+        drawH = w / imgRatio;
+        drawX = 0;
+        drawY = (h - drawH) / 2;
+      }
+
+      offscreen.width = w;
+      offscreen.height = h;
+      offCtx.drawImage(imgEl, drawX, drawY, drawW, drawH);
+
+      const imageData = offCtx.getImageData(0, 0, w, h);
+      const data = imageData.data;
+
+      // 采样像素生成粒子
+      for (let y = 0; y < h; y += SAMPLE_STEP) {
+        for (let x = 0; x < w; x += SAMPLE_STEP) {
+          const idx = (y * w + x) * 4;
+          const r = data[idx];
+          const g = data[idx + 1];
+          const b = data[idx + 2];
+          const a = data[idx + 3];
+          if (a < 10) continue; // 跳过透明像素
+
+          // 随机起始位置（从画面各处散开）
+          const angle = Math.random() * Math.PI * 2;
+          const dist = Math.random() * Math.max(w, h) * 0.6 + 100;
+          const startX = w / 2 + Math.cos(angle) * dist;
+          const startY = h / 2 + Math.sin(angle) * dist;
+
+          particles.push({
+            x: startX,
+            y: startY,
+            targetX: x,
+            targetY: y,
+            color: `rgb(${r},${g},${b})`,
+            delay: Math.random() * DELAY_RANGE,
+            size: SAMPLE_STEP * 0.8 + Math.random() * 1.5,
+          });
+        }
+      }
+    }
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function animate() {
+      const now = performance.now();
+      const elapsed = now - startTime;
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+
+      ctx.clearRect(0, 0, w, h);
+
+      let allDone = true;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const localElapsed = Math.max(0, elapsed - p.delay);
+        const progress = Math.min(1, localElapsed / DURATION);
+
+        if (progress < 1) allDone = false;
+
+        const eased = easeOutCubic(progress);
+
+        const x = p.x + (p.targetX - p.x) * eased;
+        const y = p.y + (p.targetY - p.y) * eased;
+
+        // 粒子逐渐变实
+        const alpha = Math.min(1, progress * 1.5);
+
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = alpha;
+        ctx.fillRect(x - p.size / 2, y - p.size / 2, p.size, p.size);
+      }
+
+      ctx.globalAlpha = 1;
+
+      if (allDone) {
+        // 动画完成，淡出 canvas，淡入真实背景
+        canvas.classList.add("fade-out");
+        heroBg.classList.add("ready");
+        // 完全淡出后停止动画
+        setTimeout(() => {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+          canvas.style.display = "none";
+        }, 900);
+        return;
+      }
+
+      animationId = requestAnimationFrame(animate);
+    }
+
+    // 窗口大小变化时重采样
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+        }
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        resizeCanvas();
+        if (img.complete) {
+          initParticles(img);
+          startTime = performance.now();
+          animate();
+        }
+      }, 300);
+    });
+
+    // 尊重 reduced motion 设置
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // 直接显示背景，不做粒子动画
+      heroBg.classList.add("ready");
+      canvas.style.display = "none";
+    }
+  })();
 
   // ---------- 视差滚动（requestAnimationFrame 驱动） ----------
   const parallaxEls = document.querySelectorAll("[data-parallax-speed]");

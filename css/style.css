@@ -300,6 +300,26 @@ body::after {
   z-index: 0;
   will-change: transform;
   transform: scale(1.05); /* 预放大避免视差时露边 */
+  opacity: 0;
+  transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s;
+}
+
+.hero-bg.ready {
+  opacity: 1;
+}
+
+/* 粒子聚集特效画布 */
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-particles.fade-out {
+  opacity: 0;
 }
 
 .hero-bg::after {
