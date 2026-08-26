@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="石榴 Grant・Pome 个人空间 — UI 设计师 · Furry 爱好者 · 游戏玩家">
+  <meta name="theme-color" content="#000000">
+  <title>石榴 Grant・Pome | 个人空间</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assets/avatar.png">
+  <link rel="preload" href="assets/fonts/HarmonyOS_Sans_SC.ttf" as="font" type="font/ttf" crossorigin="">
+</head>
+<body>
+  <!-- 跳过导航（无障碍） -->
+  <a href="#main" class="skip-link">跳到主要内容</a>
+
+  <!-- 顶部导航 -->
+  <nav class="navbar" id="navbar" aria-label="主导航">
+    <div class="nav-inner">
+      <a href="#hero" class="nav-logo" aria-label="返回顶部">
+        <span class="nav-logo-dot" aria-hidden="true"></span>
+        <span>石榴 Grant</span>
+      </a>
+      <div class="nav-links" role="navigation">
+        <a href="#about">关于</a>
+        <a href="#grant">经历</a>
+        <a href="#cards">版块</a>
+        <a href="#works">作品</a>
+        <a href="#contact">联系</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- 首屏 Hero -->
+    <section class="hero" id="hero" aria-label="首页">
+      <!-- 视差层 1：背景图片（最慢） -->
+      <div class="hero-bg parallax-layer" data-parallax-speed="0.15" aria-hidden="true"></div>
+      <!-- 视差层 2：光场（中速） -->
+      <div class="hero-glow parallax-layer" data-parallax-speed="0.25" aria-hidden="true"></div>
+      <!-- 视差层 3：内容（最快/接近正常） -->
+      <div class="hero-inner parallax-layer" data-parallax-speed="0.4">
+        <div class="avatar-wrap">
+          <img src="assets/avatar.png" alt="石榴 Grant・Pome 头像" class="avatar">
+        </div>
+        <h1 class="hero-name">Grant・Pome</h1>
+        <p class="hero-subtitle">个人空间</p>
+        <div class="hero-tags" aria-label="个人标签">
+          <span>学生</span><span>UI 设计</span><span>Furry</span>
+          <span>风纪委员</span><span>旅行</span><span>摄影</span>
+        </div>
+        <p class="hero-qq">🐧 3803746525</p>
+        <a href="#about" class="hero-cta">了解更多</a>
+      </div>
+      <a href="#about" class="scroll-hint" aria-label="向下滚动查看更多">
+        <span class="scroll-hint-label">SCROLL</span>
+        <span class="scroll-hint-icon" aria-hidden="true"></span>
+      </a>
+    </section>
+
+    <!-- 关于我 -->
+    <section class="section about" id="about" aria-labelledby="about-title">
+      <div class="container">
+        <div class="section-header">
+          <h2 id="about-title">关 · 于 · 我</h2>
+          <p class="section-en">About Me</p>
+        </div>
+        <p class="about-lead">我是 石榴，一名在校初中生</p>
+
+        <div class="about-grid">
+          <article class="about-item fade-in">
+            <div class="about-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.8 7.1 17.2 8 11.7 4 7.8 9.5 7z"></path></svg>
+            </div>
+            <h3>关于设计</h3>
+            <p>我偏爱简约 ins 质感，日常专注 APP 界面、图标设计、视觉排版与原创概念界面创作，喜欢把游戏元素融入作品里，在临摹练习与配色创作中打磨审美，享受从灵感草图到成品落地的全过程。</p>
+          </article>
+
+          <article class="about-item fade-in">
+            <div class="about-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="12" rx="2"></rect><path d="M8 11l3 2 3-2M14 14l2-1"></path></svg>
+            </div>
+            <h3>关于游戏</h3>
+            <p><strong>三角洲行动：</strong>偏爱蝶、女医、麦小雯，希望可以尽最大努力帮助队友。</p>
+            <p><strong>王者荣耀：</strong>主打辅助位，偏爱少司缘，尤其偏爱颜值和人设戳我的英雄，以排位为主，主打快乐上分。</p>
+            <p><strong>我的世界：</strong>痴迷自由建造，喜欢造建筑、搭场景（其实是乱搭），用方块实现各种脑洞创意。</p>
+          </article>
+
+          <article class="about-item fade-in">
+            <div class="about-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"></path><path d="M12 6v6l4 2"></path></svg>
+            </div>
+            <h3>关于本人</h3>
+            <p>四年班干部与学生会经历，让我锻炼了统筹能力与责任担当；我兼具人文思考与设计能力，撰写过文学主题论文；曾任编程猫社区风纪委员，参与社区守则修订，学会了沟通与规则意识。</p>
+            <p>目前，他在 Wey 工作室负责 UI 与视频制作，也是梦星工作室核心创作者，在实践中不断成长。</p>
+            <p>他始终认真对待每一次经历，未来将带着好奇与真诚继续探索。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 关于 Grant / Grant 的经历 -->
+    <section class="section grant-section" id="grant" aria-labelledby="grant-title">
+      <div class="container">
+
+        <!-- 关于 Grant：头像 + 简介 + 数据 -->
+        <div class="grant-about fade-in">
+          <div class="grant-about-avatar">
+            <img src="assets/avatar.png" alt="石榴 Grant 头像">
+          </div>
+          <div class="grant-about-text">
+            <p>格兰特曾在连续五年的班干部工作与学生会经历中，锻炼统筹协调能力，培养责任担当；他既撰写过关于《骆驼祥子》《红岩》的深度思考论文，也能借助 MasterGo 进行图标与界面设计，在逻辑思维与创意表达之间找到平衡；此外，他曾在编程猫社区担任三年风纪委员，深度参与点猫新社区的内测工作与《点猫社区行为守则》2026 版的修订工作，在维护社区秩序、引导良性互动的过程中，学会了耐心沟通与规则意识。</p>
+            <p>目前，他在 Wey 工作室与梦星工作室担任 UI 设计与宣传视频制作，同时也是梦星工作室核心创作者，在实践中深化设计能力，实现创意与落地的双向成长。</p>
+            <p>格兰特始终相信，成长是多维度的 —— 认真对待每一次比赛、工作与创作，也珍视生活里的每一份热爱。未来，他会继续带着好奇与真诚，探索更多可能性。</p>
+          </div>
+        </div>
+
+        <!-- 数据统计 -->
+        <div class="grant-stats">
+          <div class="stat-item fade-in">
+            <div class="stat-num">14</div>
+            <div class="stat-label">年龄</div>
+          </div>
+          <div class="stat-item fade-in">
+            <div class="stat-num">22+</div>
+            <div class="stat-label">高含金量奖项</div>
+          </div>
+          <div class="stat-item fade-in">
+            <div class="stat-num">3+</div>
+            <div class="stat-label">论文篇数</div>
+          </div>
+          <div class="stat-item fade-in">
+            <div class="stat-num">2</div>
+            <div class="stat-label">已加入社团</div>
+          </div>
+          <div class="stat-item fade-in">
+            <div class="stat-num">10+</div>
+            <div class="stat-label">重要技能与工具</div>
+          </div>
+        </div>
+
+        <!-- Grant 的经历 -->
+        <div class="section-header" style="margin-top: var(--space-16);">
+          <h2>Grant · 的 · 经历</h2>
+          <p class="section-en">Experience</p>
+        </div>
+
+        <div class="grant-grid">
+          <!-- 竞赛与获奖 -->
+          <article class="grant-card fade-in">
+            <div class="grant-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 6 .9-4.5 4.4 1 6.2L12 16.8 6.5 19.5l1-6.2L3 8.9 9 8z"></path></svg>
+            </div>
+            <h3>竞赛与获奖</h3>
+            <div class="grant-card-group">
+              <p class="grant-group-title">计算机领域</p>
+              <ul>
+                <li>2025 青少年科技创新大赛 市级二等奖</li>
+                <li>2024 青少年人工智能软件编程水平测试（YCL）全国前25%</li>
+                <li>2022 全国中小学信息技术创新与实践大赛（NOC）全国前60%</li>
+              </ul>
+            </div>
+            <div class="grant-card-group">
+              <p class="grant-group-title">校内成绩与日常</p>
+              <ul>
+                <li>屡次获得三好学生、总分二等奖等（不计入高含金量奖项）</li>
+              </ul>
+            </div>
+            <div class="grant-card-group">
+              <p class="grant-group-title">学习领域</p>
+              <ul>
+                <li>建设书香校园 读后感活动 区二等奖</li>
+                <li>《智慧掌控，辩响青春》首届辩论赛 优秀学生干部</li>
+                <li>《向阳而生，励志前行》演讲活动 校一等奖</li>
+                <li>读《白虎少年》有感 市三等奖</li>
+                <li>英语素养比赛 区前70名</li>
+                <li>市优秀班干部</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- 校园与社团经历 -->
+          <article class="grant-card fade-in">
+            <div class="grant-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <h3>校园与社团经历</h3>
+            <ul class="grant-timeline">
+              <li><span class="tl-date">2026.04</span>搭建文学社网站</li>
+              <li><span class="tl-date">2026.03-至今</span>共青团团员</li>
+              <li><span class="tl-date">2026.02-2026.04</span>参与订修《点猫社区行为守则》</li>
+              <li><span class="tl-date">2025.12-至今</span>学校学生会 主席团成员</li>
+              <li><span class="tl-date">2024.11-2025.12</span>学校社团粮芯队 成员</li>
+              <li><span class="tl-date">2024.10-至今</span>加入Wey工作室</li>
+              <li><span class="tl-date">2024.09-至今</span>班级班长</li>
+              <li><span class="tl-date">2023.01-至今</span>点猫社区 风纪委员</li>
+            </ul>
+          </article>
+
+          <!-- 技能与工具 -->
+          <article class="grant-card fade-in">
+            <div class="grant-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+            </div>
+            <h3>技能与工具</h3>
+            <div class="grant-card-group">
+              <p class="grant-group-title">编程语言</p>
+              <ul>
+                <li>Kitten4.0 图形化</li>
+                <li>Python</li>
+              </ul>
+            </div>
+            <div class="grant-card-group">
+              <p class="grant-group-title">UI设计</p>
+              <ul>
+                <li>MasterGo</li>
+              </ul>
+            </div>
+            <div class="grant-card-group">
+              <p class="grant-group-title">生产力</p>
+              <ul>
+                <li>Word</li>
+                <li>Excel</li>
+                <li>PowerPoint</li>
+                <li>WPS</li>
+                <li>剪映</li>
+              </ul>
+            </div>
+            <div class="grant-card-group">
+              <p class="grant-group-title">其他</p>
+              <ul>
+                <li>Vmware Workstations</li>
+                <li>上线啦</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- 论文 -->
+          <article class="grant-card fade-in">
+            <div class="grant-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            </div>
+            <h3>论文</h3>
+            <ul class="grant-paper-list">
+              <li>论《骆驼祥子》生存困境与人性异化的探讨</li>
+              <li>研读《红岩》极端环境中革命者的精神坚守</li>
+            </ul>
+          </article>
+
+          <!-- 其他 -->
+          <article class="grant-card fade-in">
+            <div class="grant-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 2"></path></svg>
+            </div>
+            <h3>其他</h3>
+            <div class="grant-card-group">
+              <p class="grant-group-title">语言能力</p>
+              <ul>
+                <li>英语听说读写良好，可阅读基础英文文档</li>
+              </ul>
+            </div>
+            <div class="grant-card-group">
+              <p class="grant-group-title">兴趣特长</p>
+              <ul>
+                <li>摄影、视频剪辑等</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- 挚友 -->
+          <article class="grant-card fade-in">
+            <div class="grant-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </div>
+            <h3>挚友</h3>
+            <ul class="grant-friends">
+              <li>一汪寒水</li>
+              <li>1086 爱摸鱼</li>
+              <li>Vicent轩</li>
+              <li>浊世清风</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 三大版块卡片 -->
+    <section class="section cards-section" id="cards" aria-labelledby="cards-title">
+      <div class="container">
+        <div class="section-header">
+          <h2 id="cards-title">版 · 块 · 导 · 航</h2>
+          <p class="section-en">Sections</p>
+        </div>
+
+        <div class="cards-grid">
+          <a href="#works" class="card fade-in" aria-label="查看学生 UI 设计师作品">
+            <div class="card-num" aria-hidden="true">01</div>
+            <h3>学生 UI 设计师</h3>
+            <p>主攻 UI 界面设计、视觉排版、概念页面设计，偏爱简约清新、轻度 ins 风格。</p>
+            <p>喜欢临摹练习、自制主题界面、做配色排版创作，习惯把游戏元素融入设计作品里，享受从灵感草图到成品落地的全过程。</p>
+            <span class="card-link">查看我的作品</span>
+          </a>
+
+          <article class="card fade-in">
+            <div class="card-num" aria-hidden="true">02</div>
+            <h3>Furry 控</h3>
+            <p>纯正 Furry 控，偏爱温柔系兽设、毛茸茸人设与氛围感兽人画风。</p>
+            <p>有自己的专属兽设，喜欢收藏 furry 插画、同人作品，也会自己画小头像、Q 版兽设、表情包，偏爱安静沉浸在毛茸茸的治愈氛围里，很乐意和同好交流设子、画风和脑洞设定。</p>
+          </article>
+
+          <article class="card fade-in">
+            <div class="card-num" aria-hidden="true">03</div>
+            <h3>三角洲 / 王者荣耀 / 我的世界玩家</h3>
+            <p><strong>三角洲行动：</strong>喜欢玩蝶、女医、麦小雯，看剧情世界观</p>
+            <p><strong>王者荣耀：</strong>练辅助位，偏爱颜值和人设戳我的英雄，休闲排位</p>
+            <p><strong>我的世界：</strong>热爱自由建造，喜欢造建筑、搭场景，用方块实现各种脑洞创意</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 作品集 -->
+    <section class="section works-section" id="works" aria-labelledby="works-title">
+      <div class="container">
+        <div class="section-header">
+          <h2 id="works-title">作 · 品 · 集</h2>
+          <p class="section-en">Portfolio</p>
+        </div>
+
+        <div class="works-grid" id="works-grid" role="list" aria-label="作品列表">
+          <!-- 作品卡片由 JS 动态生成 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 联系方式 -->
+    <section class="section contact-section" id="contact" aria-labelledby="contact-title">
+      <div class="container">
+        <div class="section-header">
+          <h2 id="contact-title">联 · 系 · 我</h2>
+          <p class="section-en">Contact</p>
+        </div>
+        <div class="contact-grid">
+          <a href="https://github.com/Aodemaomao" target="_blank" rel="noopener" class="contact-card fade-in" aria-label="访问 GitHub 主页">
+            <div class="contact-item">
+              <span class="contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"></path></svg>
+              </span>
+              <div>
+                <p class="contact-label">GitHub</p>
+                <p class="contact-value">@Aodemaomao</p>
+              </div>
+            </div>
+          </a>
+
+          <a href="mailto:3803746525@qq.com" class="contact-card fade-in" aria-label="发送邮件">
+            <div class="contact-item">
+              <span class="contact-icon" aria-hidden="true">✉️</span>
+              <div>
+                <p class="contact-label">邮箱</p>
+                <p class="contact-value">3803746525@qq.com</p>
+              </div>
+            </div>
+          </a>
+
+          <div class="contact-card fade-in" tabindex="0" role="region" aria-label="QQ 联系方式">
+            <div class="contact-item">
+              <span class="contact-icon" aria-hidden="true">🐧</span>
+              <div>
+                <p class="contact-label">QQ</p>
+                <p class="contact-value">3803746525</p>
+              </div>
+            </div>
+          </div>
+
+          <a href="https://space.bilibili.com/690615971" target="_blank" rel="noopener" class="contact-card fade-in" aria-label="访问 B 站主页">
+            <div class="contact-item">
+              <span class="contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.659.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906L17.813 4.653zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773H5.333zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373z"/></svg>
+              </span>
+              <div>
+                <p class="contact-label">Bilibili</p>
+                <p class="contact-value">@石榴Grant</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <p class="footer-name">石榴 Grant・Pome</p>
+    <p class="footer-update">本页面最后一次更新：2026/05/07</p>
+  </footer>
+
+  <!-- 作品详情弹窗 -->
+  <div class="modal" id="work-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+    <div class="modal-backdrop" aria-hidden="true"></div>
+    <div class="modal-content" tabindex="-1">
+      <button class="modal-close" id="modal-close" aria-label="关闭弹窗">×</button>
+      <div class="modal-body" id="modal-body">
+      </div>
+    </div>
+  </div>
+
+  <script src="js/works-data.js"></script>
+  <script src="js/main.js"></script>
+
+
+</body></html>
