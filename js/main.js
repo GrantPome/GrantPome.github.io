@@ -145,8 +145,8 @@
 
           // 亮度决定粒子大小：亮处稍大，暗处稍小
           const brightness = (r + g + b) / 3 / 255;
-          const baseSize = 0.2;
-          const size = baseSize + brightness * baseSize * 0.5 + Math.random() * 0.3;
+          const baseSize = SAMPLE_STEP * 0.4;
+          const size = baseSize + brightness * baseSize * 0.5 + Math.random() * 0.6;
 
           particles.push({
             x: startX,
