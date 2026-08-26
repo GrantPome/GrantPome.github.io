@@ -2,30 +2,49 @@
 (function () {
   "use strict";
 
-  // ---------- Hero 粒子聚集成像特效 ----------
+  // ---------- Hero 圆形粒子聚集成像特效（电影级序列） ----------
   (function () {
     const canvas = document.getElementById("hero-particles");
     const heroBg = document.querySelector(".hero-bg");
+    const heroInner = document.querySelector(".hero-inner");
+    const navbar = document.getElementById("navbar");
+    const scrollHint = document.querySelector(".scroll-hint");
     if (!canvas || !heroBg) return;
 
     const ctx = canvas.getContext("2d");
     const IMG_SRC = "assets/wallpaper.png";
-    const SAMPLE_STEP = 4; // 采样间隔，越小粒子越多
-    const DURATION = 1800; // 动画总时长 ms
-    const DELAY_RANGE = 600; // 粒子延迟分散范围 ms
+    const SAMPLE_STEP = 5;       // 采样间隔，越小粒子越多
+    const DURATION = 2000;       // 聚集动画总时长 ms
+    const DELAY_RANGE = 800;     // 粒子延迟分散范围 ms
+    const FLOAT_AMPLITUDE = 1.2; // 完成后漂浮幅度 px
+    const FLOAT_SPEED = 0.002;   // 漂浮速度
+
+    // 动画序列时间节点（相对于聚集完成时间）
+    const SEQ = {
+      bgFadeIn: 100,       // 真实背景淡入
+      overlayFadeIn: 400,  // 黑色遮罩淡入
+      canvasFadeOut: 700,  // 粒子画布淡出
+      avatarIn: 900,       // 头像淡入
+      navbarIn: 1100,      // 导航栏淡入
+      contentIn: 1300,     // 其余内容淡入
+    };
 
     let particles = [];
     let startTime = 0;
     let animationId = null;
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let allDone = false;
+    let floatTime = 0;
+    let doneTimestamp = 0;
 
     const resizeCanvas = () => {
       const hero = canvas.parentElement;
       const rect = hero.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
       canvas.style.width = rect.width + "px";
       canvas.style.height = rect.height + "px";
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
     };
 
@@ -44,11 +63,9 @@
       const w = canvas.width / dpr;
       const h = canvas.height / dpr;
 
-      // 用离屏 canvas 采样图片像素
       const offscreen = document.createElement("canvas");
       const offCtx = offscreen.getContext("2d");
 
-      // 按 cover 模式计算绘制尺寸
       const imgRatio = imgEl.width / imgEl.height;
       const canvasRatio = w / h;
       let drawW, drawH, drawX, drawY;
@@ -65,37 +82,43 @@
         drawY = (h - drawH) / 2;
       }
 
-      offscreen.width = w;
-      offscreen.height = h;
+      offscreen.width = Math.floor(w);
+      offscreen.height = Math.floor(h);
       offCtx.drawImage(imgEl, drawX, drawY, drawW, drawH);
 
-      const imageData = offCtx.getImageData(0, 0, w, h);
+      const imageData = offCtx.getImageData(0, 0, Math.floor(w), Math.floor(h));
       const data = imageData.data;
 
-      // 采样像素生成粒子
       for (let y = 0; y < h; y += SAMPLE_STEP) {
         for (let x = 0; x < w; x += SAMPLE_STEP) {
-          const idx = (y * w + x) * 4;
+          const idx = (y * Math.floor(w) + x) * 4;
           const r = data[idx];
           const g = data[idx + 1];
           const b = data[idx + 2];
           const a = data[idx + 3];
-          if (a < 10) continue; // 跳过透明像素
+          if (a < 10) continue;
 
-          // 随机起始位置（从画面各处散开）
+          // 随机起始位置：从画面外围散开
           const angle = Math.random() * Math.PI * 2;
-          const dist = Math.random() * Math.max(w, h) * 0.6 + 100;
+          const dist = Math.random() * Math.max(w, h) * 0.7 + 150;
           const startX = w / 2 + Math.cos(angle) * dist;
           const startY = h / 2 + Math.sin(angle) * dist;
+
+          // 亮度决定粒子大小：亮处稍大，暗处稍小
+          const brightness = (r + g + b) / 3 / 255;
+          const baseSize = SAMPLE_STEP * 0.55;
+          const size = baseSize + brightness * baseSize * 0.6 + Math.random() * 0.8;
 
           particles.push({
             x: startX,
             y: startY,
-            targetX: x,
-            targetY: y,
+            targetX: x + (Math.random() - 0.5) * 2,
+            targetY: y + (Math.random() - 0.5) * 2,
             color: `rgb(${r},${g},${b})`,
             delay: Math.random() * DELAY_RANGE,
-            size: SAMPLE_STEP * 0.8 + Math.random() * 1.5,
+            size: size,
+            floatPhase: Math.random() * Math.PI * 2,
+            floatSpeed: 0.8 + Math.random() * 0.6,
           });
         }
       }
@@ -103,6 +126,60 @@
 
     function easeOutCubic(t) {
       return 1 - Math.pow(1 - t, 3);
+    }
+
+    function runSequence() {
+      // 序列 1：真实背景淡入
+      setTimeout(() => {
+        heroBg.classList.add("ready");
+      }, SEQ.bgFadeIn);
+
+      // 序列 2：黑色遮罩淡入（通过 hero-bg::after 的 opacity 控制）
+      setTimeout(() => {
+        heroBg.classList.add("overlay-in");
+      }, SEQ.overlayFadeIn);
+
+      // 序列 3：粒子画布淡出
+      setTimeout(() => {
+        canvas.classList.add("fade-out");
+      }, SEQ.canvasFadeOut);
+
+      // 序列 4：头像淡入上浮
+      if (heroInner) {
+        setTimeout(() => {
+          heroInner.classList.add("avatar-in");
+        }, SEQ.avatarIn);
+      }
+
+      // 序列 5：导航栏淡入
+      if (navbar) {
+        setTimeout(() => {
+          navbar.classList.add("visible");
+        }, SEQ.navbarIn);
+      }
+
+      // 序列 6：其余内容淡入
+      if (heroInner) {
+        setTimeout(() => {
+          heroInner.classList.add("content-in");
+        }, SEQ.contentIn);
+      }
+
+      // 滚动提示淡入
+      if (scrollHint) {
+        setTimeout(() => {
+          scrollHint.classList.add("visible");
+        }, SEQ.contentIn + 200);
+      }
+
+      // 完全淡出后停止粒子动画
+      setTimeout(() => {
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+        }
+        canvas.style.display = "none";
+      }, SEQ.canvasFadeOut + 900);
     }
 
     function animate() {
@@ -113,44 +190,57 @@
 
       ctx.clearRect(0, 0, w, h);
 
-      let allDone = true;
+      let doneCount = 0;
 
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        const localElapsed = Math.max(0, elapsed - p.delay);
-        const progress = Math.min(1, localElapsed / DURATION);
+      if (!allDone) {
+        // 聚集阶段
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          const localElapsed = Math.max(0, elapsed - p.delay);
+          const progress = Math.min(1, localElapsed / DURATION);
 
-        if (progress < 1) allDone = false;
+          if (progress >= 1) doneCount++;
 
-        const eased = easeOutCubic(progress);
+          const eased = easeOutCubic(progress);
 
-        const x = p.x + (p.targetX - p.x) * eased;
-        const y = p.y + (p.targetY - p.y) * eased;
+          const x = p.x + (p.targetX - p.x) * eased;
+          const y = p.y + (p.targetY - p.y) * eased;
 
-        // 粒子逐渐变实
-        const alpha = Math.min(1, progress * 1.5);
+          const alpha = Math.min(1, progress * 1.5);
 
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = alpha;
-        ctx.fillRect(x - p.size / 2, y - p.size / 2, p.size, p.size);
+          // 圆形粒子
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(x, y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.globalAlpha = 1;
+
+        if (doneCount === particles.length) {
+          allDone = true;
+          doneTimestamp = now;
+          runSequence();
+        }
+      } else {
+        // 漂浮阶段
+        floatTime += 16;
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          const floatX = Math.sin(floatTime * FLOAT_SPEED * p.floatSpeed + p.floatPhase) * FLOAT_AMPLITUDE;
+          const floatY = Math.cos(floatTime * FLOAT_SPEED * p.floatSpeed * 0.7 + p.floatPhase) * FLOAT_AMPLITUDE * 0.6;
+
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.targetX + floatX, p.targetY + floatY, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
-      ctx.globalAlpha = 1;
-
-      if (allDone) {
-        // 动画完成，淡出 canvas，淡入真实背景
-        canvas.classList.add("fade-out");
-        heroBg.classList.add("ready");
-        // 完全淡出后停止动画
-        setTimeout(() => {
-          cancelAnimationFrame(animationId);
-          animationId = null;
-          canvas.style.display = "none";
-        }, 900);
-        return;
+      if (animationId !== null) {
+        animationId = requestAnimationFrame(animate);
       }
-
-      animationId = requestAnimationFrame(animate);
     }
 
     // 窗口大小变化时重采样
@@ -162,21 +252,33 @@
           cancelAnimationFrame(animationId);
           animationId = null;
         }
+        allDone = false;
+        floatTime = 0;
         dpr = Math.min(window.devicePixelRatio || 1, 2);
         resizeCanvas();
         if (img.complete) {
           initParticles(img);
           startTime = performance.now();
-          animate();
+          animationId = requestAnimationFrame(animate);
         }
       }, 300);
     });
 
     // 尊重 reduced motion 设置
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      // 直接显示背景，不做粒子动画
       heroBg.classList.add("ready");
+      heroBg.classList.add("overlay-in");
       canvas.style.display = "none";
+      if (heroInner) {
+        heroInner.classList.add("avatar-in", "content-in");
+      }
+      if (navbar) {
+        navbar.classList.add("visible");
+      }
+      if (scrollHint) {
+        scrollHint.classList.add("visible");
+      }
+      return;
     }
   })();
 
@@ -404,14 +506,15 @@
       </div>
     `;
 
-    // 3D 悬浮倾斜效果（优化版：缓存尺寸 + lerp 平滑 + 防抖动）
+    // 3D 悬浮倾斜效果（性能优化版：统一 rAF 调度 · 低功耗 · 自适应帧率）
     let rafId3d = null;
     let cardWidth = 0, cardHeight = 0;
-    let currentX = 0, currentY = 0;  // 当前倾斜值（用于 lerp）
-    let targetX = 0, targetY = 0;    // 目标倾斜值
+    let currentX = 0, currentY = 0;
+    let targetX = 0, targetY = 0;
     let isHovering = false;
-    const MAX_ROTATE = 6; // 削弱到 6 度
-    const LERP_FACTOR = 0.15; // 插值系数，越小越平滑
+    const MAX_ROTATE = 5.5;
+    const LERP_FACTOR = 0.12;      // 更低的插值系数 = 更丝滑
+    const IDLE_STOP_THRESHOLD = 0.02; // 更灵敏的停止阈值
 
     const update3D = () => {
       if (!isHovering) {
@@ -422,10 +525,12 @@
       currentX += (targetX - currentX) * LERP_FACTOR;
       currentY += (targetY - currentY) * LERP_FACTOR;
 
+      // 使用 translate3d 触发 GPU 合成层
       card.style.transform = `perspective(1000px) rotateX(${currentY}deg) rotateY(${currentX}deg) translateZ(6px)`;
 
-      // 如果接近目标值就停止 rAF
-      if (Math.abs(targetX - currentX) < 0.05 && Math.abs(targetY - currentY) < 0.05) {
+      // 接近目标值时停止，节省 CPU
+      if (Math.abs(targetX - currentX) < IDLE_STOP_THRESHOLD &&
+          Math.abs(targetY - currentY) < IDLE_STOP_THRESHOLD) {
         currentX = targetX;
         currentY = targetY;
         card.style.transform = `perspective(1000px) rotateX(${currentY}deg) rotateY(${currentX}deg) translateZ(6px)`;
@@ -441,24 +546,22 @@
     };
 
     card.addEventListener("mouseenter", () => {
-      // 缓存尺寸，避免每次 mousemove 都触发回流
       const rect = card.getBoundingClientRect();
       cardWidth = rect.width;
       cardHeight = rect.height;
       isHovering = true;
+      // 只在 hover 时启用 will-change，避免长期占用 GPU 内存
+      card.style.willChange = "transform";
       card.style.transition = "box-shadow 200ms ease, border-color 200ms ease";
-    });
+    }, { passive: true });
 
     card.addEventListener("mousemove", (e) => {
       if (!isHovering) return;
-      const x = e.offsetX;
-      const y = e.offsetY;
-      const centerX = cardWidth / 2;
-      const centerY = cardHeight / 2;
-      targetX = ((x - centerX) / centerX) * MAX_ROTATE;
-      targetY = -((y - centerY) / centerY) * MAX_ROTATE;
+      // 使用 offsetX/Y 直接获取相对坐标，避免 getBoundingClientRect 回流
+      targetX = ((e.offsetX - cardWidth / 2) / (cardWidth / 2)) * MAX_ROTATE;
+      targetY = -((e.offsetY - cardHeight / 2) / (cardHeight / 2)) * MAX_ROTATE;
       startLoop();
-    });
+    }, { passive: true });
 
     card.addEventListener("mouseleave", () => {
       isHovering = false;
@@ -471,16 +574,17 @@
       // 平滑复位
       card.style.transition = "transform 500ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease, border-color 200ms ease";
       card.style.transform = "perspective(1000px) rotateX(0) rotateY(0) translateZ(0)";
-      // 过渡结束后重置
+      // 过渡结束后清理 will-change
       const onEnd = (e) => {
         if (e.propertyName !== "transform") return;
         card.style.transition = "";
+        card.style.willChange = "";
         currentX = 0;
         currentY = 0;
         card.removeEventListener("transitionend", onEnd);
       };
       card.addEventListener("transitionend", onEnd);
-    });
+    }, { passive: true });
 
     const openWork = () => {
       const rect = card.getBoundingClientRect();
