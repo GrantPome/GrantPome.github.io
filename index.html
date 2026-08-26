@@ -5,6 +5,15 @@
   <meta name="description" content="石榴 Grant・Pome 个人空间 — UI 设计师 · Furry 爱好者 · 游戏玩家">
   <meta name="theme-color" content="#000000">
   <title>石榴 Grant・Pome | 个人空间</title>
+  <script>
+    // 防止主题闪烁：在 CSS 加载前从 localStorage 读取主题
+    (function() {
+      var saved = localStorage.getItem('theme');
+      if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="assets/avatar.png">
   <link rel="preload" href="assets/fonts/HarmonyOS_Sans_SC.ttf" as="font" type="font/ttf" crossorigin="">
@@ -27,6 +36,10 @@
         <a href="#works">作品</a>
         <a href="#contact">联系</a>
       </div>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换浅色/深色模式" title="切换主题">
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
     </div>
   </nav>
 
