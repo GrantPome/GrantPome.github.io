@@ -145,17 +145,16 @@
 
   --nav-hover-bg: rgba(0, 0, 0, 0.04);
   --navbar-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  /* 首屏强制深色 overlay（壁纸为深色） */
-  --hero-overlay-top: rgba(0, 0, 0, 0.2);
-  --hero-overlay-mid: rgba(0, 0, 0, 0.5);
-  --hero-overlay-bottom: #000000;
-  --hero-overlay-radial: rgba(0, 0, 0, 0.6);
+  --hero-overlay-top: rgba(255, 255, 255, 0.15);
+  --hero-overlay-mid: rgba(255, 255, 255, 0.35);
+  --hero-overlay-bottom: var(--bg-base);
+  --hero-overlay-radial: rgba(255, 255, 255, 0.5);
   --modal-backdrop-bg: rgba(0, 0, 0, 0.25);
   --focus-ring: rgba(0, 0, 0, 0.5);
   --noise-dot: rgba(0, 0, 0, 0.015);
   --theme-toggle-bg: rgba(0, 0, 0, 0.04);
   --theme-toggle-border: rgba(0, 0, 0, 0.1);
-  --hero-text-shadow: 0 2px 24px rgba(0, 0, 0, 0.5);
+  --hero-text-shadow: 0 2px 24px rgba(255, 255, 255, 0.3);
   --modal-close-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   --modal-content-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
 }
@@ -308,26 +307,26 @@ body::after {
 }
 
 .nav-logo {
+  font-weight: 600;
+  font-size: 14px;
   color: var(--text-primary);
   display: flex;
   align-items: center;
-  transition: opacity var(--dur-fast) var(--ease-fluent);
+  gap: 10px;
+  letter-spacing: 0.3px;
 }
 
-.nav-logo:hover {
-  opacity: 0.8;
-}
-
-.nav-logo-svg {
-  height: 22px;
-  width: auto;
-  display: block;
-  filter: drop-shadow(0 0 8px var(--accent-glow));
+.nav-logo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--text-primary);
+  box-shadow: 0 0 12px var(--accent-glow);
   transition: transform var(--dur-fast) var(--ease-fluent);
 }
 
-.nav-logo:hover .nav-logo-svg {
-  transform: scale(1.03);
+.nav-logo:hover .nav-logo-dot {
+  transform: scale(1.2);
 }
 
 .nav-links {
@@ -690,13 +689,13 @@ body::after {
 
 /* ---------- 通用 section ---------- */
 .section {
-  padding: var(--space-16) 0;
+  padding: var(--space-20) 0;
   position: relative;
 }
 
 .section-header {
   text-align: center;
-  margin-bottom: var(--space-10);
+  margin-bottom: var(--space-12);
 }
 
 .section-header h2 {
@@ -948,24 +947,8 @@ body::after {
               border-color var(--dur-normal) var(--ease-fluent);
   border: 1px solid var(--border-subtle);
   transform-style: preserve-3d;
-  transform-origin: center center;
   will-change: transform;
-  position: relative;
 }
-
-.work-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    color-mix(in srgb, var(--text-primary) 8%, transparent), transparent 50%);
-  opacity: 0;
-  transition: opacity var(--dur-slow) ease;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.work-card:hover::after { opacity: 1; }
 
 .work-card:hover {
   box-shadow: var(--shadow-2);
@@ -1360,23 +1343,7 @@ body::after {
   border: 1px solid var(--border-default);
   box-shadow: none;
   transition: all var(--dur-normal) var(--ease-fluent);
-  position: relative;
-  overflow: hidden;
 }
-
-.contact-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    color-mix(in srgb, var(--text-primary) 6%, transparent), transparent 50%);
-  opacity: 0;
-  transition: opacity var(--dur-slow) ease;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.contact-card:hover::after { opacity: 1; }
 
 .contact-card:hover {
   background: rgba(255, 255, 255, 0.04);
@@ -1438,146 +1405,26 @@ body::after {
 
 /* ---------- 页脚 ---------- */
 .footer {
-  padding: var(--space-16) var(--space-6) var(--space-6);
+  padding: var(--space-10) var(--space-6);
+  text-align: center;
   border-top: 1px solid var(--border-subtle);
   background: rgba(5, 5, 8, 0.4);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  position: relative;
-  overflow: hidden;
-}
-
-.footer::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
-}
-
-.footer-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space-16);
-  flex-wrap: wrap;
-}
-
-.footer-brand {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
-  flex-shrink: 0;
-}
-
-.footer-logo {
-  width: 120px;
-  height: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-primary);
-  flex-shrink: 0;
-  filter: drop-shadow(0 0 10px var(--accent-glow));
-}
-
-.footer-logo svg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.footer-brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  align-items: flex-start;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .footer-name {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 0.2px;
-  line-height: 1.3;
-}
-
-.footer-tagline {
-  font-size: var(--fs-caption);
-  color: var(--text-tertiary);
-  letter-spacing: 0.5px;
-}
-
-.footer-cols {
-  display: flex;
-  gap: var(--space-12);
-}
-
-.footer-col {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.footer-col-title {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--text-tertiary);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin-bottom: var(--space-1);
-}
-
-.footer-col-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.footer-col-list a {
-  font-size: var(--fs-small);
   color: var(--text-secondary);
-  text-decoration: none;
-  position: relative;
-  transition: color var(--dur-fast) var(--ease-fluent),
-              text-shadow var(--dur-fast) var(--ease-fluent);
-}
-
-.footer-col-list a:hover {
-  color: var(--text-primary);
-  text-shadow: 0 0 12px var(--accent-glow);
-}
-
-.footer-bottom {
-  max-width: 1100px;
-  margin: var(--space-12) auto 0;
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--border-subtle);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-}
-
-.footer-copyright,
-.footer-update {
-  font-size: var(--fs-caption);
-  color: var(--text-tertiary);
+  margin-bottom: var(--space-1);
   letter-spacing: 0.3px;
 }
 
 .footer-update {
-  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-tertiary);
+  letter-spacing: 0.3px;
 }
 
 /* ---------- 弹窗（Acrylic） ---------- */
@@ -1837,34 +1684,14 @@ body::after {
 
   .modal-body { padding: var(--space-6) var(--space-5); }
   .modal-body h2 { font-size: 18px; }
-
-  .footer-inner {
-    flex-direction: column;
-    gap: var(--space-8);
-  }
-
-  .footer-cols {
-    gap: var(--space-10);
-  }
 }
 
 @media (max-width: 480px) {
-  .nav-logo-svg { height: 18px; }
-  .footer-logo { width: 90px; }
+  .nav-logo span { display: none; }
   .hero-subtitle { letter-spacing: 4px; }
   .hero-tags span { font-size: 11px; padding: 4px 12px; }
   .contact-icon { width: 44px; height: 44px; font-size: 20px; }
   .contact-value { font-size: 16px; }
-
-  .footer-cols {
-    flex-direction: column;
-    gap: var(--space-6);
-  }
-
-  .footer-bottom {
-    flex-direction: column;
-    text-align: center;
-  }
 }
 
 /* ============================================
@@ -1931,17 +1758,6 @@ body::after {
    浅色模式覆盖
    ============================================ */
 
-/* 导航栏未滚动时（首屏上方），强制白色文字 */
-[data-theme="light"] .navbar:not(.scrolled) {
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.72);
-  --text-tertiary: rgba(255, 255, 255, 0.45);
-  --nav-hover-bg: rgba(255, 255, 255, 0.05);
-  --accent-soft: rgba(255, 255, 255, 0.08);
-  --theme-toggle-bg: rgba(255, 255, 255, 0.06);
-  --theme-toggle-border: rgba(255, 255, 255, 0.1);
-}
-
 /* Hero 区域始终使用白色文字（背景为深色壁纸） */
 [data-theme="light"] .hero-name,
 [data-theme="light"] .hero-subtitle,
@@ -1984,19 +1800,8 @@ body::after {
   color: rgba(255, 255, 255, 0.5);
 }
 
-[data-theme="light"] .scroll-hint-icon {
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
 [data-theme="light"] .scroll-hint-icon::before {
   background: rgba(255, 255, 255, 0.5);
-}
-
-/* 关于板块图标：浅色模式不用黑色背景 */
-[data-theme="light"] .about-icon {
-  background: var(--bg-layer);
-  color: var(--text-primary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 /* 装饰性白色背景 → 深色 */
@@ -2043,11 +1848,6 @@ body::after {
   color: var(--text-secondary);
 }
 
-/* 页脚浅色模式 */
-[data-theme="light"] .footer {
-  background: rgba(255, 255, 255, 0.5);
-}
-
 /* 主题切换平滑过渡 */
 .theme-toggle,
 .navbar,
@@ -2068,79 +1868,4 @@ body::after,
   transition-property: background, background-color, border-color, color, box-shadow, fill, stroke;
   transition-duration: 300ms;
   transition-timing-function: var(--ease-fluent);
-}
-
-/* ============================================
-   iPadOS 风格形变鼠标球
-   ============================================ */
-
-/* 隐藏默认鼠标（仅精确指针设备） */
-@media (pointer: fine) {
-  *, *::before, *::after {
-    cursor: none !important;
-  }
-}
-
-/* 外层：负责位置 */
-.cursor-glow {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-  z-index: 9999;
-  will-change: transform;
-}
-
-/* 内层：负责形变，mix-blend-mode 自动适应背景深浅 */
-.cursor-glow-inner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  mix-blend-mode: difference;
-  transform: translate(-50%, -50%);
-  transition: width 0.3s var(--ease-spring),
-              height 0.3s var(--ease-spring),
-              border-radius 0.3s var(--ease-spring),
-              background 0.3s var(--ease-fluent),
-              border-color 0.3s var(--ease-fluent);
-  will-change: transform, width, height;
-}
-
-/* 悬停可交互元素时变大 */
-.cursor-glow-inner.hovering {
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-/* 按下时缩小变实 */
-.cursor-glow-inner.pressed {
-  width: 14px;
-  height: 14px;
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.6);
-}
-
-/* 按钮粘连时光晕 */
-.btn-sticky-glow {
-  box-shadow: 0 0 40px color-mix(in srgb, var(--text-primary) 12%, transparent) !important;
-}
-
-/* 触屏设备隐藏 */
-@media (pointer: coarse) {
-  .cursor-glow { display: none; }
-}
-
-/* reduced motion 模式隐藏 */
-@media (prefers-reduced-motion: reduce) {
-  .cursor-glow { display: none; }
-  *, *::before, *::after { cursor: auto !important; }
 }
