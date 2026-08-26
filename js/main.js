@@ -13,7 +13,7 @@
 
     const ctx = canvas.getContext("2d");
     const IMG_SRC = "assets/wallpaper.png";
-    const SAMPLE_STEP = 5;       // 采样间隔，越小粒子越多
+    const SAMPLE_STEP = 7;       // 采样间隔，越大粒子越少
     const DURATION = 2000;       // 聚集动画总时长 ms
     const DELAY_RANGE = 800;     // 粒子延迟分散范围 ms
     const FLOAT_AMPLITUDE = 1.2; // 完成后漂浮幅度 px
@@ -145,8 +145,8 @@
 
           // 亮度决定粒子大小：亮处稍大，暗处稍小
           const brightness = (r + g + b) / 3 / 255;
-          const baseSize = SAMPLE_STEP * 0.55;
-          const size = baseSize + brightness * baseSize * 0.6 + Math.random() * 0.8;
+          const baseSize = SAMPLE_STEP * 0.4;
+          const size = baseSize + brightness * baseSize * 0.5 + Math.random() * 0.6;
 
           particles.push({
             x: startX,
