@@ -857,6 +857,15 @@
       modalBackdrop.style.opacity = "0";
     });
 
+    // 提前0.2s开始卡片淡入，与弹窗淡出交叉过渡
+    setTimeout(() => {
+      if (activeCard && activeCard.style.opacity === "0") {
+        activeCard.style.transition = "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1)";
+        activeCard.style.opacity = "1";
+        activeCard.style.pointerEvents = "";
+      }
+    }, 260);
+
     setTimeout(() => {
       doClose();
     }, 460);
@@ -883,8 +892,11 @@
     // 恢复原卡片显示（平滑淡入）
     if (activeCard) {
       const cardRef = activeCard;
-      cardRef.style.transition = "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1)";
-      cardRef.style.opacity = "1";
+      // 边界情况：如果提前淡入未触发，立即开始
+      if (cardRef.style.opacity === "0") {
+        cardRef.style.transition = "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1)";
+        cardRef.style.opacity = "1";
+      }
       cardRef.style.pointerEvents = "";
       setTimeout(() => {
         cardRef.style.transition = "";
