@@ -125,7 +125,10 @@
 
       offscreen.width = Math.floor(w);
       offscreen.height = Math.floor(h);
+      // 先对离屏画布做模糊处理，使粒子组成的是模糊版图片
+      offCtx.filter = "blur(15px)";
       offCtx.drawImage(imgEl, drawX, drawY, drawW, drawH);
+      offCtx.filter = "none";
 
       const imageData = offCtx.getImageData(0, 0, Math.floor(w), Math.floor(h));
       const data = imageData.data;
