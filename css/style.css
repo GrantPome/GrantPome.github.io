@@ -307,14 +307,27 @@ body::after {
   background-size: cover;
   background-position: center;
   z-index: 0;
-  will-change: transform;
-  transform: scale(1.05); /* 预放大避免视差时露边 */
+  will-change: transform, filter, opacity;
+  transform: scale(1.08); /* 预放大避免模糊边缘露白 + 视差露边 */
   opacity: 0;
-  transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s;
+  filter: blur(30px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 模糊背景淡入：粒子快聚齐时出现 */
+.hero-bg.blur-in {
+  opacity: 1;
+}
+
+/* 从模糊变清晰 */
+.hero-bg.sharpen {
+  filter: blur(0);
 }
 
 .hero-bg.ready {
   opacity: 1;
+  filter: blur(0);
 }
 
 /* 粒子聚集特效画布 */

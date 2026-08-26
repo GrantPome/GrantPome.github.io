@@ -21,12 +21,12 @@
 
     // 动画序列时间节点（相对于聚集完成时间）
     const SEQ = {
-      bgFadeIn: 100,       // 真实背景淡入
-      overlayFadeIn: 400,  // 黑色遮罩淡入
-      canvasFadeOut: 700,  // 粒子画布淡出
-      avatarIn: 900,       // 头像淡入
-      navbarIn: 1100,      // 导航栏淡入
-      contentIn: 1300,     // 其余内容淡入
+      bgSharpen: 0,          // 背景从模糊变清晰（聚集完成立刻开始）
+      overlayFadeIn: 700,    // 黑色遮罩淡入
+      canvasFadeOut: 900,    // 粒子画布淡出
+      avatarIn: 1100,        // 头像淡入
+      navbarIn: 1300,        // 导航栏淡入
+      contentIn: 1500,       // 其余内容淡入
     };
 
     let particles = [];
@@ -36,6 +36,7 @@
     let allDone = false;
     let floatTime = 0;
     let doneTimestamp = 0;
+    let blurTriggered = false;
 
     const resizeCanvas = () => {
       const hero = canvas.parentElement;
@@ -83,7 +84,8 @@
     img.src = IMG_SRC;
 
     function showAllContent() {
-      heroBg.classList.add("ready");
+      heroBg.classList.add("blur-in");
+      heroBg.classList.add("sharpen");
       heroBg.classList.add("overlay-in");
       if (heroInner) {
         heroInner.classList.add("avatar-in");
@@ -169,12 +171,13 @@
 
     function runSequence() {
       sequenceStarted = true;
-      // 序列 1：真实背景淡入
-      setTimeout(() => {
-        heroBg.classList.add("ready");
-      }, SEQ.bgFadeIn);
 
-      // 序列 2：黑色遮罩淡入（通过 hero-bg::after 的 opacity 控制）
+      // 序列 1：背景从模糊变清晰
+      setTimeout(() => {
+        heroBg.classList.add("sharpen");
+      }, SEQ.bgSharpen);
+
+      // 序列 2：黑色遮罩淡入
       setTimeout(() => {
         heroBg.classList.add("overlay-in");
       }, SEQ.overlayFadeIn);
@@ -230,10 +233,9 @@
 
       ctx.clearRect(0, 0, w, h);
 
-      let doneCount = 0;
-
       if (!allDone) {
         // 聚集阶段
+        let doneCount = 0;
         for (let i = 0; i < particles.length; i++) {
           const p = particles[i];
           const localElapsed = Math.max(0, elapsed - p.delay);
@@ -257,6 +259,13 @@
         }
 
         ctx.globalAlpha = 1;
+
+        // 粒子聚集达到 80% 时，模糊背景淡入
+        const overallProgress = doneCount / particles.length;
+        if (!blurTriggered && overallProgress > 0.8) {
+          blurTriggered = true;
+          heroBg.classList.add("blur-in");
+        }
 
         if (doneCount === particles.length) {
           allDone = true;
@@ -306,7 +315,8 @@
 
     // 尊重 reduced motion 设置
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      heroBg.classList.add("ready");
+      heroBg.classList.add("blur-in");
+      heroBg.classList.add("sharpen");
       heroBg.classList.add("overlay-in");
       canvas.style.display = "none";
       if (heroInner) {
