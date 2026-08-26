@@ -636,6 +636,9 @@
 
     const openWork = () => {
       const rect = card.getBoundingClientRect();
+      // 在 pointerEvents 改变前捕获倾斜值，避免 mouseleave 重置
+      const tiltY = currentX;
+      const tiltX = currentY;
       activeCard = card;
       card.style.pointerEvents = "none";
       isHovering = false;
@@ -646,7 +649,7 @@
       // 卡片逐渐消失（400ms），与弹窗交叉淡入
       card.style.transition = "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1)";
       card.style.opacity = "0";
-      openModal(w, rect, currentX, currentY);
+      openModal(w, rect, tiltY, tiltX);
     };
 
     card.addEventListener("click", openWork);
@@ -758,7 +761,7 @@
         const rotY = cardRotateY || 0;
         const rotX = cardRotateX || 0;
 
-        modalContent.style.transform = `translate3d(${startX}px, ${startY}px, 0) scale(${startScale}) perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        modalContent.style.transform = `perspective(1000px) translate3d(${startX}px, ${startY}px, 0) scale(${startScale}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
         modalContent.style.opacity = "0";
         modalContent.style.borderRadius = "16px";
         modalBody.style.opacity = "0";
@@ -776,7 +779,7 @@
         modalBackdrop.style.transition = "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1)";
         modalBody.style.transition = "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1) 200ms";
 
-        modalContent.style.transform = "translate3d(0, 0, 0) scale(1) perspective(1000px) rotateX(0) rotateY(0)";
+        modalContent.style.transform = "perspective(1000px) translate3d(0, 0, 0) scale(1) rotateX(0) rotateY(0)";
         modalContent.style.opacity = "1";
         modalContent.style.borderRadius = "20px";
         modalBody.style.opacity = "1";
@@ -857,14 +860,14 @@
       modalBackdrop.style.opacity = "0";
     });
 
-    // 提前0.2s开始卡片淡入，与弹窗淡出交叉过渡
+    // 提前0.4s开始卡片淡入，与弹窗淡出交叉过渡
     setTimeout(() => {
       if (activeCard && activeCard.style.opacity === "0") {
         activeCard.style.transition = "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1)";
         activeCard.style.opacity = "1";
         activeCard.style.pointerEvents = "";
       }
-    }, 260);
+    }, 60);
 
     setTimeout(() => {
       doClose();
