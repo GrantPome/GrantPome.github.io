@@ -50,13 +50,52 @@
 
     const img = new Image();
     img.crossOrigin = "anonymous";
+    let sequenceStarted = false;
+
+    // 安全兜底：5 秒后无论如何都显示内容（防止图片加载失败导致页面空白）
+    const safetyTimer = setTimeout(() => {
+      if (!sequenceStarted) {
+        sequenceStarted = true;
+        showAllContent();
+        canvas.style.display = "none";
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+        }
+      }
+    }, 5000);
+
     img.onload = () => {
+      clearTimeout(safetyTimer);
       resizeCanvas();
       initParticles(img);
       startTime = performance.now();
-      animate();
+      animationId = requestAnimationFrame(animate);
     };
+
+    img.onerror = () => {
+      clearTimeout(safetyTimer);
+      sequenceStarted = true;
+      showAllContent();
+      canvas.style.display = "none";
+    };
+
     img.src = IMG_SRC;
+
+    function showAllContent() {
+      heroBg.classList.add("ready");
+      heroBg.classList.add("overlay-in");
+      if (heroInner) {
+        heroInner.classList.add("avatar-in");
+        heroInner.classList.add("content-in");
+      }
+      if (navbar) {
+        navbar.classList.add("visible");
+      }
+      if (scrollHint) {
+        scrollHint.classList.add("visible");
+      }
+    }
 
     function initParticles(imgEl) {
       particles = [];
@@ -129,6 +168,7 @@
     }
 
     function runSequence() {
+      sequenceStarted = true;
       // 序列 1：真实背景淡入
       setTimeout(() => {
         heroBg.classList.add("ready");
@@ -506,15 +546,14 @@
       </div>
     `;
 
-    // 3D 悬浮倾斜效果（性能优化版：统一 rAF 调度 · 低功耗 · 自适应帧率）
+    // 3D 悬浮倾斜效果（缓存尺寸 + lerp 平滑 + 防抖动）
     let rafId3d = null;
     let cardWidth = 0, cardHeight = 0;
-    let currentX = 0, currentY = 0;
-    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;  // 当前倾斜值（用于 lerp）
+    let targetX = 0, targetY = 0;    // 目标倾斜值
     let isHovering = false;
-    const MAX_ROTATE = 5.5;
-    const LERP_FACTOR = 0.12;      // 更低的插值系数 = 更丝滑
-    const IDLE_STOP_THRESHOLD = 0.02; // 更灵敏的停止阈值
+    const MAX_ROTATE = 6; // 削弱到 6 度
+    const LERP_FACTOR = 0.15; // 插值系数，越小越平滑
 
     const update3D = () => {
       if (!isHovering) {
@@ -525,12 +564,10 @@
       currentX += (targetX - currentX) * LERP_FACTOR;
       currentY += (targetY - currentY) * LERP_FACTOR;
 
-      // 使用 translate3d 触发 GPU 合成层
       card.style.transform = `perspective(1000px) rotateX(${currentY}deg) rotateY(${currentX}deg) translateZ(6px)`;
 
-      // 接近目标值时停止，节省 CPU
-      if (Math.abs(targetX - currentX) < IDLE_STOP_THRESHOLD &&
-          Math.abs(targetY - currentY) < IDLE_STOP_THRESHOLD) {
+      // 如果接近目标值就停止 rAF
+      if (Math.abs(targetX - currentX) < 0.05 && Math.abs(targetY - currentY) < 0.05) {
         currentX = targetX;
         currentY = targetY;
         card.style.transform = `perspective(1000px) rotateX(${currentY}deg) rotateY(${currentX}deg) translateZ(6px)`;
@@ -546,22 +583,24 @@
     };
 
     card.addEventListener("mouseenter", () => {
+      // 缓存尺寸，避免每次 mousemove 都触发回流
       const rect = card.getBoundingClientRect();
       cardWidth = rect.width;
       cardHeight = rect.height;
       isHovering = true;
-      // 只在 hover 时启用 will-change，避免长期占用 GPU 内存
-      card.style.willChange = "transform";
       card.style.transition = "box-shadow 200ms ease, border-color 200ms ease";
-    }, { passive: true });
+    });
 
     card.addEventListener("mousemove", (e) => {
       if (!isHovering) return;
-      // 使用 offsetX/Y 直接获取相对坐标，避免 getBoundingClientRect 回流
-      targetX = ((e.offsetX - cardWidth / 2) / (cardWidth / 2)) * MAX_ROTATE;
-      targetY = -((e.offsetY - cardHeight / 2) / (cardHeight / 2)) * MAX_ROTATE;
+      const x = e.offsetX;
+      const y = e.offsetY;
+      const centerX = cardWidth / 2;
+      const centerY = cardHeight / 2;
+      targetX = ((x - centerX) / centerX) * MAX_ROTATE;
+      targetY = -((y - centerY) / centerY) * MAX_ROTATE;
       startLoop();
-    }, { passive: true });
+    });
 
     card.addEventListener("mouseleave", () => {
       isHovering = false;
@@ -574,17 +613,16 @@
       // 平滑复位
       card.style.transition = "transform 500ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease, border-color 200ms ease";
       card.style.transform = "perspective(1000px) rotateX(0) rotateY(0) translateZ(0)";
-      // 过渡结束后清理 will-change
+      // 过渡结束后重置
       const onEnd = (e) => {
         if (e.propertyName !== "transform") return;
         card.style.transition = "";
-        card.style.willChange = "";
         currentX = 0;
         currentY = 0;
         card.removeEventListener("transitionend", onEnd);
       };
       card.addEventListener("transitionend", onEnd);
-    }, { passive: true });
+    });
 
     const openWork = () => {
       const rect = card.getBoundingClientRect();
