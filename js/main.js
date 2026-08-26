@@ -760,8 +760,12 @@
         const startScale = originRect.width / targetRect.width;
         const rotY = cardRotateY || 0;
         const rotX = cardRotateX || 0;
+        // 左右翻转：在卡片倾斜方向上叠加翻转角度，打开时翻转回正
+        const flipAngle = 30;
+        const flipSign = rotY >= 0 ? 1 : -1;
+        const startRotY = rotY + flipSign * flipAngle;
 
-        modalContent.style.transform = `perspective(1000px) translate3d(${startX}px, ${startY}px, 0) scale(${startScale}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        modalContent.style.transform = `perspective(1000px) translate3d(${startX}px, ${startY}px, 0) scale(${startScale}) rotateX(${rotX}deg) rotateY(${startRotY}deg)`;
         modalContent.style.opacity = "0";
         modalContent.style.borderRadius = "16px";
         modalBody.style.opacity = "0";
