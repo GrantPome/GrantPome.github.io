@@ -643,8 +643,8 @@
         cancelAnimationFrame(rafId3d);
         rafId3d = null;
       }
-      // 立即隐藏卡片，让弹窗从卡片位置无缝接管视觉
-      card.style.transition = "none";
+      // 卡片逐渐消失（400ms），与弹窗交叉淡入
+      card.style.transition = "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1)";
       card.style.opacity = "0";
       openModal(w, rect, currentX, currentY);
     };
@@ -883,13 +883,13 @@
     // 恢复原卡片显示（平滑淡入）
     if (activeCard) {
       const cardRef = activeCard;
-      cardRef.style.transition = "opacity 300ms cubic-bezier(0.22, 1, 0.36, 1)";
+      cardRef.style.transition = "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1)";
       cardRef.style.opacity = "1";
       cardRef.style.pointerEvents = "";
       setTimeout(() => {
         cardRef.style.transition = "";
         cardRef.style.opacity = "";
-      }, 320);
+      }, 420);
       activeCard = null;
     }
 
