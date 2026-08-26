@@ -924,6 +924,24 @@
     if (e.key === "Escape" && modal.classList.contains("open")) closeModal();
   });
 
+  // ---------- 主题切换（浅色/深色） ----------
+  const themeToggle = document.getElementById("theme-toggle");
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme");
+      const next = current === "light" ? "dark" : "light";
+      if (next === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+        document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f5f5f7");
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("theme", "dark");
+        document.querySelector('meta[name="theme-color"]').setAttribute("content", "#000000");
+      }
+    });
+  }
+
   // ---------- 平滑滚动（导航点击时优化偏移） ----------
   document.querySelectorAll('a[href^="#"]').forEach((link) => {
     link.addEventListener("click", (e) => {
