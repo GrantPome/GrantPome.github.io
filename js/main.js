@@ -8,11 +8,11 @@
   }
   window.scrollTo(0, 0);
 
-  // ---------- 全局光晕鼠标特效 ----------
+  // ---------- iPadOS 风格形变鼠标球 ----------
   (function () {
     const glow = document.getElementById("cursor-glow");
-    if (!glow) return;
-    // 触屏设备或 reduced motion 模式不启用
+    const inner = document.getElementById("cursor-glow-inner");
+    if (!glow || !inner) return;
     if (window.matchMedia("(pointer: coarse)").matches) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
@@ -20,37 +20,76 @@
     let mouseY = window.innerHeight / 2;
     let glowX = mouseX;
     let glowY = mouseY;
-    let rafId = null;
+    let prevX = mouseX;
+    let prevY = mouseY;
+    let velX = 0;
+    let velY = 0;
 
-    // lerp 平滑跟随
-    const LERP = 0.18;
+    // lerp 系数
+    const LERP_POS = 0.2;
+    const LERP_VEL = 0.12;
+
     const animate = () => {
-      glowX += (mouseX - glowX) * LERP;
-      glowY += (mouseY - glowY) * LERP;
-      glow.style.transform = `translate(${glowX}px, ${glowY}px) translate(-50%, -50%)`;
-      rafId = requestAnimationFrame(animate);
+      // 平滑跟随鼠标
+      glowX += (mouseX - glowX) * LERP_POS;
+      glowY += (mouseY - glowY) * LERP_POS;
+
+      // 计算速度（鼠标实际位移）
+      const dx = mouseX - prevX;
+      const dy = mouseY - prevY;
+      prevX = mouseX;
+      prevY = mouseY;
+
+      // 平滑速度
+      velX += (dx - velX) * LERP_VEL;
+      velY += (dy - velY) * LERP_VEL;
+
+      const speed = Math.sqrt(velX * velX + velY * velY);
+      // 速度越大拉伸越明显，上限 0.6
+      const stretch = Math.min(speed * 0.015, 0.6);
+      // 拉伸方向跟随移动角度
+      const angle = (Math.atan2(velY, velX) * 180) / Math.PI;
+
+      // 外层只负责位移
+      glow.style.transform = `translate(${glowX}px, ${glowY}px)`;
+      // 内层负责形变：沿移动方向拉伸，垂直方向收缩
+      inner.style.transform = `translate(-50%, -50%) rotate(${angle}deg) scale(${1 + stretch}, ${1 - stretch * 0.4})`;
+
+      requestAnimationFrame(animate);
     };
 
     window.addEventListener("mousemove", (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
-      if (!rafId) animate();
     });
 
-    // 按下时光晕聚集
+    // 按下缩小变实
     window.addEventListener("mousedown", () => {
-      glow.classList.add("pressed");
+      inner.classList.add("pressed");
     });
     window.addEventListener("mouseup", () => {
-      glow.classList.remove("pressed");
+      inner.classList.remove("pressed");
     });
 
-    // 鼠标离开页面时隐藏光晕
-    document.addEventListener("mouseleave", () => {
+    // 悬停可交互元素时变大
+    const hoverSelector = "a, button, .work-card, .contact-card, .grant-card, .nav-logo, .scroll-hint, .theme-toggle, .modal-close, .footer-col-list a";
+    document.addEventListener("mouseover", (e) => {
+      if (e.target.closest(hoverSelector)) {
+        inner.classList.add("hovering");
+      }
+    });
+    document.addEventListener("mouseout", (e) => {
+      if (e.target.closest(hoverSelector)) {
+        inner.classList.remove("hovering");
+      }
+    });
+
+    // 鼠标离开页面时隐藏
+    document.documentElement.addEventListener("mouseleave", () => {
       glow.style.opacity = "0";
     });
-    document.addEventListener("mouseenter", () => {
-      glow.style.opacity = "";
+    document.documentElement.addEventListener("mouseenter", () => {
+      glow.style.opacity = "1";
     });
 
     animate();
