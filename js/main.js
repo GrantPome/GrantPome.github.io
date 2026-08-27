@@ -25,20 +25,23 @@
     let velX = 0;
     let velY = 0;
 
-    // 状态机：normal（正常跟随）| card（卡片光晕，隐藏鼠标球）| button（形变吸附按钮）
+    // 状态机：normal | card | button
     let mode = "normal";
-    let btnEl = null;       // 当前吸附的按钮
-    let btnRect = null;     // 按钮原始位置
-    let stickyX = 0;       // 粘连偏移 X
-    let stickyY = 0;       // 粘连偏移 Y
+    let btnEl = null;
+    let btnRect = null;
+    let stickyX = 0;
+    let stickyY = 0;
+    let cardLeaveTimer = null;
 
     const LERP_POS = 0.2;
     const LERP_VEL = 0.12;
     const STICKY_FACTOR = 0.2;
 
+    const cardSelector = ".work-card, .contact-card, .grant-card, .card";
+    const buttonSelector = "button, .theme-toggle, .modal-close, .nav-logo, .scroll-hint, .nav-links a, .footer-col-list a, .modal-btn";
+
     const animate = () => {
       if (mode === "normal") {
-        // 正常模式：lerp 跟随 + 速度形变
         glowX += (mouseX - glowX) * LERP_POS;
         glowY += (mouseY - glowY) * LERP_POS;
 
@@ -57,7 +60,6 @@
         glow.style.transform = `translate(${glowX}px, ${glowY}px)`;
         inner.style.transform = `translate(-50%, -50%) rotate(${angle}deg) scale(${1 + stretch}, ${1 - stretch * 0.4})`;
       } else if (mode === "button" && btnRect) {
-        // 按钮模式：吸附到按钮中心 + 粘连偏移
         const tx = btnRect.left + btnRect.width / 2 + stickyX;
         const ty = btnRect.top + btnRect.height / 2 + stickyY;
         glowX += (tx - glowX) * 0.3;
@@ -66,7 +68,6 @@
         glow.style.transform = `translate(${glowX}px, ${glowY}px)`;
         inner.style.transform = "translate(-50%, -50%)";
       } else if (mode === "card") {
-        // 卡片模式：隐藏鼠标球，卡片内部光晕接管
         glow.style.opacity = "0";
       }
 
@@ -83,67 +84,87 @@
         stickyX = (e.clientX - cx) * STICKY_FACTOR;
         stickyY = (e.clientY - cy) * STICKY_FACTOR;
 
-        // 超出范围则回到正常模式
         const maxOffset = Math.max(btnRect.width, btnRect.height) * 0.6;
         const dist = Math.sqrt(stickyX * stickyX + stickyY * stickyY);
         if (dist > maxOffset) {
           resetButton();
         } else if (btnEl) {
-          btnEl.style.transform = `translate(${stickyX}px, ${stickyY}px)`;
+          // 用 translate 属性，不覆盖 CSS transform
+          btnEl.style.translate = `${stickyX}px ${stickyY}px`;
         }
       }
     });
 
-    // ===== 卡片光晕：隐藏鼠标球，卡片 ::after 接管 =====
-    const cardSelector = ".work-card, .contact-card, .grant-card, .card";
-    document.querySelectorAll(cardSelector).forEach((card) => {
-      card.addEventListener("mouseenter", () => {
-        if (mode !== "normal") return;
+    // ===== 事件委托：按钮 + 卡片 =====
+    document.addEventListener("mouseover", (e) => {
+      // 取消卡片离开计时器
+      if (cardLeaveTimer) { clearTimeout(cardLeaveTimer); cardLeaveTimer = null; }
+
+      // 检测按钮
+      const btn = e.target.closest(buttonSelector);
+      if (btn) {
+        if (mode === "card") mode = "normal";
+        if (mode === "button" && btnEl === btn) return;
+        if (mode === "button") resetButton();
+        if (mode === "normal") enterButton(btn);
+        return;
+      }
+
+      // 检测卡片
+      const card = e.target.closest(cardSelector);
+      if (card && mode === "normal") {
         mode = "card";
-      });
-      card.addEventListener("mouseleave", () => {
-        if (mode !== "card") return;
-        mode = "normal";
-      });
+      }
     });
 
-    // ===== 按钮形变 + 粘连 =====
-    const buttonSelector = "button, .theme-toggle, .modal-close, .nav-logo, .scroll-hint";
-    document.querySelectorAll(buttonSelector).forEach((btn) => {
-      btn.addEventListener("mouseenter", () => {
-        if (mode !== "normal") return;
-        mode = "button";
-        btnEl = btn;
-        // 捕获按钮原始位置（transform 前）
-        btn.style.transform = "";
-        btnRect = btn.getBoundingClientRect();
-        stickyX = 0;
-        stickyY = 0;
-
-        // 形变为按钮形状
-        const isCircle = btn.classList.contains("modal-close") || btn.classList.contains("theme-toggle");
-        inner.style.width = btnRect.width + "px";
-        inner.style.height = btnRect.height + "px";
-        inner.style.borderRadius = isCircle ? "50%" : getComputedStyle(btn).borderRadius || "12px";
-        inner.style.background = "color-mix(in srgb, var(--text-primary) 4%, transparent)";
-        inner.style.borderColor = "color-mix(in srgb, var(--text-primary) 15%, transparent)";
-
-        // 按钮光晕
-        btn.classList.add("btn-sticky-glow");
-      });
-
-      btn.addEventListener("mouseleave", () => {
-        if (mode !== "button" || btnEl !== btn) return;
+    document.addEventListener("mouseout", (e) => {
+      // 按钮离开
+      if (mode === "button" && btnEl) {
+        if (e.relatedTarget && btnEl.contains(e.relatedTarget)) return;
+        if (e.relatedTarget && e.relatedTarget.closest(buttonSelector)) return;
+        if (e.relatedTarget && e.relatedTarget.closest(cardSelector)) { resetButton(); return; }
         resetButton();
-      });
+        return;
+      }
+
+      // 卡片离开
+      if (mode === "card") {
+        const card = e.target.closest(cardSelector);
+        if (!card) return;
+        if (e.relatedTarget && card.contains(e.relatedTarget)) return;
+        if (e.relatedTarget && e.relatedTarget.closest(cardSelector)) return;
+        if (e.relatedTarget && e.relatedTarget.closest(buttonSelector)) { mode = "normal"; return; }
+        // 延迟切回正常，避免卡片间移动闪烁
+        cardLeaveTimer = setTimeout(() => {
+          if (mode === "card") mode = "normal";
+          cardLeaveTimer = null;
+        }, 80);
+      }
     });
+
+    function enterButton(btn) {
+      mode = "button";
+      btnEl = btn;
+      btn.style.translate = "";
+      btnRect = btn.getBoundingClientRect();
+      stickyX = 0;
+      stickyY = 0;
+
+      const isCircle = btn.classList.contains("modal-close") || btn.classList.contains("theme-toggle");
+      inner.style.width = btnRect.width + "px";
+      inner.style.height = btnRect.height + "px";
+      inner.style.borderRadius = isCircle ? "50%" : getComputedStyle(btn).borderRadius || "12px";
+      inner.style.background = "color-mix(in srgb, var(--text-primary) 4%, transparent)";
+      inner.style.borderColor = "color-mix(in srgb, var(--text-primary) 15%, transparent)";
+
+      btn.classList.add("btn-sticky-glow");
+    }
 
     function resetButton() {
       if (btnEl) {
-        btnEl.style.transform = "";
+        btnEl.style.translate = "";
         btnEl.classList.remove("btn-sticky-glow");
       }
-      // 重置鼠标球尺寸（CSS 默认值接管）
       inner.style.width = "";
       inner.style.height = "";
       inner.style.borderRadius = "";
