@@ -2093,7 +2093,7 @@ body::after,
   will-change: transform;
 }
 
-/* 内层：负责形变 */
+/* 内层：负责形变，mix-blend-mode 自动适应背景深浅 */
 .cursor-glow-inner {
   position: absolute;
   top: 0;
@@ -2101,8 +2101,9 @@ body::after,
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
-  border: 1.5px solid color-mix(in srgb, var(--text-primary) 35%, transparent);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  mix-blend-mode: difference;
   transform: translate(-50%, -50%);
   transition: width 0.3s var(--ease-spring),
               height 0.3s var(--ease-spring),
@@ -2116,16 +2117,16 @@ body::after,
 .cursor-glow-inner.hovering {
   width: 48px;
   height: 48px;
-  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
-  border-color: color-mix(in srgb, var(--text-primary) 25%, transparent);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 /* 按下时缩小变实 */
 .cursor-glow-inner.pressed {
   width: 14px;
   height: 14px;
-  background: color-mix(in srgb, var(--text-primary) 20%, transparent);
-  border-color: color-mix(in srgb, var(--text-primary) 60%, transparent);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 /* 按钮粘连时光晕 */
