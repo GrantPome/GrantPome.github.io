@@ -20,10 +20,6 @@
     let mouseY = window.innerHeight / 2;
     let glowX = mouseX;
     let glowY = mouseY;
-    let prevX = mouseX;
-    let prevY = mouseY;
-    let velX = 0;
-    let velY = 0;
 
     // 状态机：normal | card | button
     let mode = "normal";
@@ -33,8 +29,6 @@
     let stickyY = 0;
     let cardLeaveTimer = null;
 
-    const LERP_POS = 0.2;
-    const LERP_VEL = 0.12;
     const STICKY_FACTOR = 0.2;
 
     const cardSelector = ".work-card, .contact-card, .grant-card, .card";
@@ -42,23 +36,12 @@
 
     const animate = () => {
       if (mode === "normal") {
-        glowX += (mouseX - glowX) * LERP_POS;
-        glowY += (mouseY - glowY) * LERP_POS;
-
-        const dx = mouseX - prevX;
-        const dy = mouseY - prevY;
-        prevX = mouseX;
-        prevY = mouseY;
-        velX += (dx - velX) * LERP_VEL;
-        velY += (dy - velY) * LERP_VEL;
-
-        const speed = Math.sqrt(velX * velX + velY * velY);
-        const stretch = Math.min(speed * 0.015, 0.6);
-        const angle = (Math.atan2(velY, velX) * 180) / Math.PI;
-
+        // 线性 1:1 跟随，无形变
+        glowX = mouseX;
+        glowY = mouseY;
         glow.style.opacity = "1";
         glow.style.transform = `translate(${glowX}px, ${glowY}px)`;
-        inner.style.transform = `translate(-50%, -50%) rotate(${angle}deg) scale(${1 + stretch}, ${1 - stretch * 0.4})`;
+        inner.style.transform = "translate(-50%, -50%)";
       } else if (mode === "button" && btnRect) {
         const tx = btnRect.left + btnRect.width / 2 + stickyX;
         const ty = btnRect.top + btnRect.height / 2 + stickyY;
@@ -89,7 +72,6 @@
         if (dist > maxOffset) {
           resetButton();
         } else if (btnEl) {
-          // 用 translate 属性，不覆盖 CSS transform
           btnEl.style.translate = `${stickyX}px ${stickyY}px`;
         }
       }
@@ -97,20 +79,21 @@
 
     // ===== 事件委托：按钮 + 卡片 =====
     document.addEventListener("mouseover", (e) => {
-      // 取消卡片离开计时器
       if (cardLeaveTimer) { clearTimeout(cardLeaveTimer); cardLeaveTimer = null; }
 
-      // 检测按钮
       const btn = e.target.closest(buttonSelector);
       if (btn) {
-        if (mode === "card") mode = "normal";
+        if (mode === "card") {
+          mode = "normal";
+          glowX = mouseX;
+          glowY = mouseY;
+        }
         if (mode === "button" && btnEl === btn) return;
         if (mode === "button") resetButton();
         if (mode === "normal") enterButton(btn);
         return;
       }
 
-      // 检测卡片
       const card = e.target.closest(cardSelector);
       if (card && mode === "normal") {
         mode = "card";
@@ -133,10 +116,20 @@
         if (!card) return;
         if (e.relatedTarget && card.contains(e.relatedTarget)) return;
         if (e.relatedTarget && e.relatedTarget.closest(cardSelector)) return;
-        if (e.relatedTarget && e.relatedTarget.closest(buttonSelector)) { mode = "normal"; return; }
+        if (e.relatedTarget && e.relatedTarget.closest(buttonSelector)) {
+          mode = "normal";
+          glowX = mouseX;
+          glowY = mouseY;
+          return;
+        }
         // 延迟切回正常，避免卡片间移动闪烁
         cardLeaveTimer = setTimeout(() => {
-          if (mode === "card") mode = "normal";
+          if (mode === "card") {
+            mode = "normal";
+            // 立即同步到鼠标位置，避免出现在过期位置
+            glowX = mouseX;
+            glowY = mouseY;
+          }
           cardLeaveTimer = null;
         }, 80);
       }
@@ -149,6 +142,9 @@
       btnRect = btn.getBoundingClientRect();
       stickyX = 0;
       stickyY = 0;
+      // 从当前鼠标位置开始吸附
+      glowX = mouseX;
+      glowY = mouseY;
 
       const isCircle = btn.classList.contains("modal-close") || btn.classList.contains("theme-toggle");
       inner.style.width = btnRect.width + "px";
@@ -176,6 +172,9 @@
       btnRect = null;
       stickyX = 0;
       stickyY = 0;
+      // 同步到鼠标位置
+      glowX = mouseX;
+      glowY = mouseY;
     }
 
     // 按下缩小（仅正常模式）
