@@ -8,7 +8,7 @@
   }
   window.scrollTo(0, 0);
 
-  // ---------- iPadOS 风格形变鼠标球 ----------
+  // ---------- iPadOS 风格形变鼠标球（三态状态机） ----------
   (function () {
     const glow = document.getElementById("cursor-glow");
     const inner = document.getElementById("cursor-glow-inner");
@@ -25,35 +25,50 @@
     let velX = 0;
     let velY = 0;
 
-    // lerp 系数
+    // 状态机：normal（正常跟随）| card（卡片光晕，隐藏鼠标球）| button（形变吸附按钮）
+    let mode = "normal";
+    let btnEl = null;       // 当前吸附的按钮
+    let btnRect = null;     // 按钮原始位置
+    let stickyX = 0;       // 粘连偏移 X
+    let stickyY = 0;       // 粘连偏移 Y
+
     const LERP_POS = 0.2;
     const LERP_VEL = 0.12;
+    const STICKY_FACTOR = 0.2;
 
     const animate = () => {
-      // 平滑跟随鼠标
-      glowX += (mouseX - glowX) * LERP_POS;
-      glowY += (mouseY - glowY) * LERP_POS;
+      if (mode === "normal") {
+        // 正常模式：lerp 跟随 + 速度形变
+        glowX += (mouseX - glowX) * LERP_POS;
+        glowY += (mouseY - glowY) * LERP_POS;
 
-      // 计算速度（鼠标实际位移）
-      const dx = mouseX - prevX;
-      const dy = mouseY - prevY;
-      prevX = mouseX;
-      prevY = mouseY;
+        const dx = mouseX - prevX;
+        const dy = mouseY - prevY;
+        prevX = mouseX;
+        prevY = mouseY;
+        velX += (dx - velX) * LERP_VEL;
+        velY += (dy - velY) * LERP_VEL;
 
-      // 平滑速度
-      velX += (dx - velX) * LERP_VEL;
-      velY += (dy - velY) * LERP_VEL;
+        const speed = Math.sqrt(velX * velX + velY * velY);
+        const stretch = Math.min(speed * 0.015, 0.6);
+        const angle = (Math.atan2(velY, velX) * 180) / Math.PI;
 
-      const speed = Math.sqrt(velX * velX + velY * velY);
-      // 速度越大拉伸越明显，上限 0.6
-      const stretch = Math.min(speed * 0.015, 0.6);
-      // 拉伸方向跟随移动角度
-      const angle = (Math.atan2(velY, velX) * 180) / Math.PI;
-
-      // 外层只负责位移
-      glow.style.transform = `translate(${glowX}px, ${glowY}px)`;
-      // 内层负责形变：沿移动方向拉伸，垂直方向收缩
-      inner.style.transform = `translate(-50%, -50%) rotate(${angle}deg) scale(${1 + stretch}, ${1 - stretch * 0.4})`;
+        glow.style.opacity = "1";
+        glow.style.transform = `translate(${glowX}px, ${glowY}px)`;
+        inner.style.transform = `translate(-50%, -50%) rotate(${angle}deg) scale(${1 + stretch}, ${1 - stretch * 0.4})`;
+      } else if (mode === "button" && btnRect) {
+        // 按钮模式：吸附到按钮中心 + 粘连偏移
+        const tx = btnRect.left + btnRect.width / 2 + stickyX;
+        const ty = btnRect.top + btnRect.height / 2 + stickyY;
+        glowX += (tx - glowX) * 0.3;
+        glowY += (ty - glowY) * 0.3;
+        glow.style.opacity = "1";
+        glow.style.transform = `translate(${glowX}px, ${glowY}px)`;
+        inner.style.transform = "translate(-50%, -50%)";
+      } else if (mode === "card") {
+        // 卡片模式：隐藏鼠标球，卡片内部光晕接管
+        glow.style.opacity = "0";
+      }
 
       requestAnimationFrame(animate);
     };
@@ -61,27 +76,93 @@
     window.addEventListener("mousemove", (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
+
+      if (mode === "button" && btnRect) {
+        const cx = btnRect.left + btnRect.width / 2;
+        const cy = btnRect.top + btnRect.height / 2;
+        stickyX = (e.clientX - cx) * STICKY_FACTOR;
+        stickyY = (e.clientY - cy) * STICKY_FACTOR;
+
+        // 超出范围则回到正常模式
+        const maxOffset = Math.max(btnRect.width, btnRect.height) * 0.6;
+        const dist = Math.sqrt(stickyX * stickyX + stickyY * stickyY);
+        if (dist > maxOffset) {
+          resetButton();
+        } else if (btnEl) {
+          btnEl.style.transform = `translate(${stickyX}px, ${stickyY}px)`;
+        }
+      }
     });
 
-    // 按下缩小变实
+    // ===== 卡片光晕：隐藏鼠标球，卡片 ::after 接管 =====
+    const cardSelector = ".work-card, .contact-card, .grant-card, .card";
+    document.querySelectorAll(cardSelector).forEach((card) => {
+      card.addEventListener("mouseenter", () => {
+        if (mode !== "normal") return;
+        mode = "card";
+      });
+      card.addEventListener("mouseleave", () => {
+        if (mode !== "card") return;
+        mode = "normal";
+      });
+    });
+
+    // ===== 按钮形变 + 粘连 =====
+    const buttonSelector = "button, .theme-toggle, .modal-close, .nav-logo, .scroll-hint";
+    document.querySelectorAll(buttonSelector).forEach((btn) => {
+      btn.addEventListener("mouseenter", () => {
+        if (mode !== "normal") return;
+        mode = "button";
+        btnEl = btn;
+        // 捕获按钮原始位置（transform 前）
+        btn.style.transform = "";
+        btnRect = btn.getBoundingClientRect();
+        stickyX = 0;
+        stickyY = 0;
+
+        // 形变为按钮形状
+        const isCircle = btn.classList.contains("modal-close") || btn.classList.contains("theme-toggle");
+        inner.style.width = btnRect.width + "px";
+        inner.style.height = btnRect.height + "px";
+        inner.style.borderRadius = isCircle ? "50%" : getComputedStyle(btn).borderRadius || "12px";
+        inner.style.background = "color-mix(in srgb, var(--text-primary) 4%, transparent)";
+        inner.style.borderColor = "color-mix(in srgb, var(--text-primary) 15%, transparent)";
+
+        // 按钮光晕
+        btn.classList.add("btn-sticky-glow");
+      });
+
+      btn.addEventListener("mouseleave", () => {
+        if (mode !== "button" || btnEl !== btn) return;
+        resetButton();
+      });
+    });
+
+    function resetButton() {
+      if (btnEl) {
+        btnEl.style.transform = "";
+        btnEl.classList.remove("btn-sticky-glow");
+      }
+      // 重置鼠标球尺寸（CSS 默认值接管）
+      inner.style.width = "";
+      inner.style.height = "";
+      inner.style.borderRadius = "";
+      inner.style.background = "";
+      inner.style.borderColor = "";
+
+      mode = "normal";
+      btnEl = null;
+      btnRect = null;
+      stickyX = 0;
+      stickyY = 0;
+    }
+
+    // 按下缩小（仅正常模式）
     window.addEventListener("mousedown", () => {
-      inner.classList.add("pressed");
+      if (mode === "normal") inner.classList.add("pressed");
     });
     window.addEventListener("mouseup", () => {
       inner.classList.remove("pressed");
-    });
-
-    // 悬停可交互元素时变大
-    const hoverSelector = "a, button, .work-card, .contact-card, .grant-card, .nav-logo, .scroll-hint, .theme-toggle, .modal-close, .footer-col-list a";
-    document.addEventListener("mouseover", (e) => {
-      if (e.target.closest(hoverSelector)) {
-        inner.classList.add("hovering");
-      }
-    });
-    document.addEventListener("mouseout", (e) => {
-      if (e.target.closest(hoverSelector)) {
-        inner.classList.remove("hovering");
-      }
     });
 
     // 鼠标离开页面时隐藏
@@ -89,7 +170,7 @@
       glow.style.opacity = "0";
     });
     document.documentElement.addEventListener("mouseenter", () => {
-      glow.style.opacity = "1";
+      if (mode !== "card") glow.style.opacity = "1";
     });
 
     animate();
@@ -546,7 +627,7 @@
   fadeEls.forEach((el) => observer.observe(el));
 
   // ---------- 卡片鼠标光晕追踪（rAF 节流） ----------
-  const glowCards = document.querySelectorAll(".card, .grant-card");
+  const glowCards = document.querySelectorAll(".card, .grant-card, .work-card, .contact-card");
   glowCards.forEach((card) => {
     let rafId = null;
     let targetX = 50, targetY = 50;
