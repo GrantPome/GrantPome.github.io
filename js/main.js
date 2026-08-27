@@ -147,9 +147,22 @@
       glowY = mouseY;
 
       const isCircle = btn.classList.contains("modal-close") || btn.classList.contains("theme-toggle");
-      inner.style.width = btnRect.width + "px";
-      inner.style.height = btnRect.height + "px";
-      inner.style.borderRadius = isCircle ? "50%" : getComputedStyle(btn).borderRadius || "12px";
+      // 文字链接类元素使用固定大圆角矩形
+      const isTextLink = btn.matches(".footer-col-list a, .nav-links a, .modal-btn");
+
+      if (isCircle) {
+        inner.style.width = btnRect.width + "px";
+        inner.style.height = btnRect.height + "px";
+        inner.style.borderRadius = "50%";
+      } else if (isTextLink) {
+        inner.style.width = "64px";
+        inner.style.height = "36px";
+        inner.style.borderRadius = "18px";
+      } else {
+        inner.style.width = btnRect.width + "px";
+        inner.style.height = btnRect.height + "px";
+        inner.style.borderRadius = getComputedStyle(btn).borderRadius || "12px";
+      }
       inner.style.background = "color-mix(in srgb, var(--text-primary) 4%, transparent)";
       inner.style.borderColor = "color-mix(in srgb, var(--text-primary) 15%, transparent)";
 
