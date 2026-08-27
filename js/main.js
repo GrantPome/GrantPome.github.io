@@ -79,9 +79,15 @@
 
     // ===== 事件委托：按钮 + 卡片 =====
     document.addEventListener("mouseover", (e) => {
-      if (cardLeaveTimer) { clearTimeout(cardLeaveTimer); cardLeaveTimer = null; }
-
       const btn = e.target.closest(buttonSelector);
+      const card = e.target.closest(cardSelector);
+
+      // 只在进入卡片或按钮时取消离开计时器（避免移到普通元素时误清）
+      if ((btn || card) && cardLeaveTimer) {
+        clearTimeout(cardLeaveTimer);
+        cardLeaveTimer = null;
+      }
+
       if (btn) {
         if (mode === "card") {
           mode = "normal";
@@ -94,7 +100,6 @@
         return;
       }
 
-      const card = e.target.closest(cardSelector);
       if (card && mode === "normal") {
         mode = "card";
       }
@@ -147,22 +152,9 @@
       glowY = mouseY;
 
       const isCircle = btn.classList.contains("modal-close") || btn.classList.contains("theme-toggle");
-      // 文字链接类元素使用固定大圆角矩形
-      const isTextLink = btn.matches(".footer-col-list a, .nav-links a, .modal-btn");
-
-      if (isCircle) {
-        inner.style.width = btnRect.width + "px";
-        inner.style.height = btnRect.height + "px";
-        inner.style.borderRadius = "50%";
-      } else if (isTextLink) {
-        inner.style.width = "64px";
-        inner.style.height = "36px";
-        inner.style.borderRadius = "18px";
-      } else {
-        inner.style.width = btnRect.width + "px";
-        inner.style.height = btnRect.height + "px";
-        inner.style.borderRadius = getComputedStyle(btn).borderRadius || "12px";
-      }
+      inner.style.width = btnRect.width + "px";
+      inner.style.height = btnRect.height + "px";
+      inner.style.borderRadius = isCircle ? "50%" : getComputedStyle(btn).borderRadius || "12px";
       inner.style.background = "color-mix(in srgb, var(--text-primary) 4%, transparent)";
       inner.style.borderColor = "color-mix(in srgb, var(--text-primary) 15%, transparent)";
 
