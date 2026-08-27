@@ -949,7 +949,22 @@ body::after {
   transform-style: preserve-3d;
   transform-origin: center center;
   will-change: transform;
+  position: relative;
 }
+
+.work-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    color-mix(in srgb, var(--text-primary) 8%, transparent), transparent 50%);
+  opacity: 0;
+  transition: opacity var(--dur-slow) ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.work-card:hover::after { opacity: 1; }
 
 .work-card:hover {
   box-shadow: var(--shadow-2);
@@ -1344,7 +1359,23 @@ body::after {
   border: 1px solid var(--border-default);
   box-shadow: none;
   transition: all var(--dur-normal) var(--ease-fluent);
+  position: relative;
+  overflow: hidden;
 }
+
+.contact-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    color-mix(in srgb, var(--text-primary) 6%, transparent), transparent 50%);
+  opacity: 0;
+  transition: opacity var(--dur-slow) ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.contact-card:hover::after { opacity: 1; }
 
 .contact-card:hover {
   background: rgba(255, 255, 255, 0.04);
@@ -2052,6 +2083,7 @@ body::after,
   transform: translate(-50%, -50%);
   transition: width 0.3s var(--ease-spring),
               height 0.3s var(--ease-spring),
+              border-radius 0.3s var(--ease-spring),
               background 0.3s var(--ease-fluent),
               border-color 0.3s var(--ease-fluent);
   will-change: transform, width, height;
@@ -2071,6 +2103,11 @@ body::after,
   height: 14px;
   background: color-mix(in srgb, var(--text-primary) 20%, transparent);
   border-color: color-mix(in srgb, var(--text-primary) 60%, transparent);
+}
+
+/* 按钮粘连时光晕 */
+.btn-sticky-glow {
+  box-shadow: 0 0 40px color-mix(in srgb, var(--text-primary) 12%, transparent) !important;
 }
 
 /* 触屏设备隐藏 */
