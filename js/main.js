@@ -2,7 +2,206 @@
 (function () {
   "use strict";
 
-  // ---------- Hero 圆形粒子聚集成像特效（电影级序列） ----------
+  // 刷新时始终回到首屏顶部
+  if ("scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
+  }
+  window.scrollTo(0, 0);
+
+  // ---------- iPadOS 风格形变鼠标球（三态状态机） ----------
+  (function () {
+    const glow = document.getElementById("cursor-glow");
+    const inner = document.getElementById("cursor-glow-inner");
+    if (!glow || !inner) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let glowX = mouseX;
+    let glowY = mouseY;
+
+    // 状态机：normal | card | button
+    let mode = "normal";
+    let btnEl = null;
+    let btnRect = null;
+    let stickyX = 0;
+    let stickyY = 0;
+    let cardLeaveTimer = null;
+
+    const STICKY_FACTOR = 0.2;
+
+    const cardSelector = ".work-card, .contact-card, .grant-card, .card";
+    const buttonSelector = "button, .theme-toggle, .modal-close, .nav-logo, .scroll-hint, .nav-links a, .footer-col-list a, .modal-btn";
+
+    const animate = () => {
+      if (mode === "normal") {
+        // 线性 1:1 跟随，无形变
+        glowX = mouseX;
+        glowY = mouseY;
+        glow.style.opacity = "1";
+        glow.style.transform = `translate(${glowX}px, ${glowY}px)`;
+        inner.style.transform = "translate(-50%, -50%)";
+      } else if (mode === "button" && btnRect) {
+        const tx = btnRect.left + btnRect.width / 2 + stickyX;
+        const ty = btnRect.top + btnRect.height / 2 + stickyY;
+        glowX += (tx - glowX) * 0.3;
+        glowY += (ty - glowY) * 0.3;
+        glow.style.opacity = "1";
+        glow.style.transform = `translate(${glowX}px, ${glowY}px)`;
+        inner.style.transform = "translate(-50%, -50%)";
+      } else if (mode === "card") {
+        glow.style.opacity = "0";
+      }
+
+      requestAnimationFrame(animate);
+    };
+
+    window.addEventListener("mousemove", (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+      if (mode === "button" && btnRect) {
+        const cx = btnRect.left + btnRect.width / 2;
+        const cy = btnRect.top + btnRect.height / 2;
+        stickyX = (e.clientX - cx) * STICKY_FACTOR;
+        stickyY = (e.clientY - cy) * STICKY_FACTOR;
+
+        const maxOffset = Math.max(btnRect.width, btnRect.height) * 0.6;
+        const dist = Math.sqrt(stickyX * stickyX + stickyY * stickyY);
+        if (dist > maxOffset) {
+          resetButton();
+        } else if (btnEl) {
+          btnEl.style.translate = `${stickyX}px ${stickyY}px`;
+        }
+      }
+    });
+
+    // ===== 事件委托：按钮 + 卡片 =====
+    document.addEventListener("mouseover", (e) => {
+      const btn = e.target.closest(buttonSelector);
+      const card = e.target.closest(cardSelector);
+
+      // 只在进入卡片或按钮时取消离开计时器（避免移到普通元素时误清）
+      if ((btn || card) && cardLeaveTimer) {
+        clearTimeout(cardLeaveTimer);
+        cardLeaveTimer = null;
+      }
+
+      if (btn) {
+        if (mode === "card") {
+          mode = "normal";
+          glowX = mouseX;
+          glowY = mouseY;
+        }
+        if (mode === "button" && btnEl === btn) return;
+        if (mode === "button") resetButton();
+        if (mode === "normal") enterButton(btn);
+        return;
+      }
+
+      if (card && mode === "normal") {
+        mode = "card";
+      }
+    });
+
+    document.addEventListener("mouseout", (e) => {
+      // 按钮离开
+      if (mode === "button" && btnEl) {
+        if (e.relatedTarget && btnEl.contains(e.relatedTarget)) return;
+        if (e.relatedTarget && e.relatedTarget.closest(buttonSelector)) return;
+        if (e.relatedTarget && e.relatedTarget.closest(cardSelector)) { resetButton(); return; }
+        resetButton();
+        return;
+      }
+
+      // 卡片离开
+      if (mode === "card") {
+        const card = e.target.closest(cardSelector);
+        if (!card) return;
+        if (e.relatedTarget && card.contains(e.relatedTarget)) return;
+        if (e.relatedTarget && e.relatedTarget.closest(cardSelector)) return;
+        if (e.relatedTarget && e.relatedTarget.closest(buttonSelector)) {
+          mode = "normal";
+          glowX = mouseX;
+          glowY = mouseY;
+          return;
+        }
+        // 延迟切回正常，避免卡片间移动闪烁
+        cardLeaveTimer = setTimeout(() => {
+          if (mode === "card") {
+            mode = "normal";
+            // 立即同步到鼠标位置，避免出现在过期位置
+            glowX = mouseX;
+            glowY = mouseY;
+          }
+          cardLeaveTimer = null;
+        }, 80);
+      }
+    });
+
+    function enterButton(btn) {
+      mode = "button";
+      btnEl = btn;
+      btn.style.translate = "";
+      btnRect = btn.getBoundingClientRect();
+      stickyX = 0;
+      stickyY = 0;
+      // 从当前鼠标位置开始吸附
+      glowX = mouseX;
+      glowY = mouseY;
+
+      const isCircle = btn.classList.contains("modal-close") || btn.classList.contains("theme-toggle");
+      inner.style.width = btnRect.width + "px";
+      inner.style.height = btnRect.height + "px";
+      inner.style.borderRadius = isCircle ? "50%" : getComputedStyle(btn).borderRadius || "12px";
+      inner.style.background = "rgba(128, 128, 128, 0.12)";
+      inner.style.borderColor = "rgba(128, 128, 128, 0.4)";
+
+      btn.classList.add("btn-sticky-glow");
+    }
+
+    function resetButton() {
+      if (btnEl) {
+        btnEl.style.translate = "";
+        btnEl.classList.remove("btn-sticky-glow");
+      }
+      inner.style.width = "";
+      inner.style.height = "";
+      inner.style.borderRadius = "";
+      inner.style.background = "";
+      inner.style.borderColor = "";
+
+      mode = "normal";
+      btnEl = null;
+      btnRect = null;
+      stickyX = 0;
+      stickyY = 0;
+      // 同步到鼠标位置
+      glowX = mouseX;
+      glowY = mouseY;
+    }
+
+    // 按下缩小（仅正常模式）
+    window.addEventListener("mousedown", () => {
+      if (mode === "normal") inner.classList.add("pressed");
+    });
+    window.addEventListener("mouseup", () => {
+      inner.classList.remove("pressed");
+    });
+
+    // 鼠标离开页面时隐藏
+    document.documentElement.addEventListener("mouseleave", () => {
+      glow.style.opacity = "0";
+    });
+    document.documentElement.addEventListener("mouseenter", () => {
+      if (mode !== "card") glow.style.opacity = "1";
+    });
+
+    animate();
+  })();
+
+  // ---------- Hero 方形粒子聚集成像特效（电影级序列） ----------
   (function () {
     const canvas = document.getElementById("hero-particles");
     const heroBg = document.querySelector(".hero-bg");
@@ -257,12 +456,10 @@
 
           const alpha = Math.min(1, progress * 1.5);
 
-          // 圆形粒子
+          // 方形粒子
           ctx.globalAlpha = alpha;
           ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(x, y, p.size, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.fillRect(x - p.size, y - p.size, p.size * 2, p.size * 2);
         }
 
         ctx.globalAlpha = 1;
@@ -281,9 +478,12 @@
           const floatY = Math.cos(floatTime * FLOAT_SPEED * p.floatSpeed * 0.7 + p.floatPhase) * FLOAT_AMPLITUDE * 0.6;
 
           ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(p.targetX + floatX, p.targetY + floatY, p.size, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.fillRect(
+            p.targetX + floatX - p.size,
+            p.targetY + floatY - p.size,
+            p.size * 2,
+            p.size * 2
+          );
         }
       }
 
@@ -451,24 +651,27 @@
   );
   fadeEls.forEach((el) => observer.observe(el));
 
-  // ---------- 卡片鼠标光晕追踪（rAF 节流） ----------
-  const glowCards = document.querySelectorAll(".card, .grant-card");
-  glowCards.forEach((card) => {
-    let rafId = null;
-    let targetX = 50, targetY = 50;
+  // ---------- 卡片鼠标光晕追踪（事件委托 + rAF 节流） ----------
+  let glowRafId = null;
+  let glowTargetEl = null;
+  let glowTargetX = 50, glowTargetY = 50;
 
-    const updateGlow = () => {
-      card.style.setProperty("--mouse-x", targetX + "%");
-      card.style.setProperty("--mouse-y", targetY + "%");
-      rafId = null;
-    };
+  const updateCardGlow = () => {
+    if (glowTargetEl) {
+      glowTargetEl.style.setProperty("--mouse-x", glowTargetX + "%");
+      glowTargetEl.style.setProperty("--mouse-y", glowTargetY + "%");
+    }
+    glowRafId = null;
+  };
 
-    card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
-      targetX = ((e.clientX - rect.left) / rect.width) * 100;
-      targetY = ((e.clientY - rect.top) / rect.height) * 100;
-      if (!rafId) rafId = requestAnimationFrame(updateGlow);
-    });
+  document.addEventListener("mousemove", (e) => {
+    const card = e.target.closest(".card, .grant-card, .work-card, .contact-card");
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    glowTargetX = ((e.clientX - rect.left) / rect.width) * 100;
+    glowTargetY = ((e.clientY - rect.top) / rect.height) * 100;
+    glowTargetEl = card;
+    if (!glowRafId) glowRafId = requestAnimationFrame(updateCardGlow);
   });
 
   // ---------- Hero CTA 3D 悬浮效果 ----------
@@ -536,6 +739,18 @@
   // ---------- 渲染作品集 ----------
   const grid = document.getElementById("works-grid");
   let activeCard = null; // 当前打开的卡片（用于隐藏/显示）
+
+  // 动态计算作品集最新更新日期
+  const latestDate = worksData
+    .map(w => new Date(w.date.replace(/\//g, "-")))
+    .reduce((max, d) => d > max ? d : max, new Date(0));
+  const updateEl = document.getElementById("works-last-update");
+  if (updateEl && latestDate.getTime() > 0) {
+    const y = latestDate.getFullYear();
+    const m = String(latestDate.getMonth() + 1).padStart(2, "0");
+    const d = String(latestDate.getDate()).padStart(2, "0");
+    updateEl.textContent = `${y}/${m}/${d}`;
+  }
 
   worksData.forEach((w, i) => {
     const card = document.createElement("div");
