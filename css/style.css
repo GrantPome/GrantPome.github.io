@@ -2017,7 +2017,7 @@ body::after,
 }
 
 /* ============================================
-   全局光晕鼠标特效
+   iPadOS 风格形变鼠标球
    ============================================ */
 
 /* 隐藏默认鼠标（仅精确指针设备） */
@@ -2027,51 +2027,58 @@ body::after,
   }
 }
 
+/* 外层：负责位置 */
 .cursor-glow {
   position: fixed;
   top: 0;
   left: 0;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
+  width: 0;
+  height: 0;
   pointer-events: none;
   z-index: 9999;
+  will-change: transform;
+}
+
+/* 内层：负责形变 */
+.cursor-glow-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--text-primary) 35%, transparent);
   transform: translate(-50%, -50%);
-  background: radial-gradient(
-    circle,
-    var(--accent-glow) 0%,
-    var(--glow-white) 30%,
-    transparent 65%
-  );
-  filter: blur(20px);
-  opacity: 0.6;
   transition: width 0.3s var(--ease-spring),
               height 0.3s var(--ease-spring),
-              opacity 0.3s var(--ease-fluent),
-              filter 0.3s var(--ease-fluent);
+              background 0.3s var(--ease-fluent),
+              border-color 0.3s var(--ease-fluent);
   will-change: transform, width, height;
 }
 
-/* 按下时光晕聚集 */
-.cursor-glow.pressed {
-  width: 120px;
-  height: 120px;
-  opacity: 1;
-  filter: blur(8px);
-  background: radial-gradient(
-    circle,
-    var(--accent-glow) 0%,
-    var(--glow-white) 50%,
-    transparent 80%
-  );
+/* 悬停可交互元素时变大 */
+.cursor-glow-inner.hovering {
+  width: 48px;
+  height: 48px;
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  border-color: color-mix(in srgb, var(--text-primary) 25%, transparent);
 }
 
-/* 触屏设备隐藏光晕 */
+/* 按下时缩小变实 */
+.cursor-glow-inner.pressed {
+  width: 14px;
+  height: 14px;
+  background: color-mix(in srgb, var(--text-primary) 20%, transparent);
+  border-color: color-mix(in srgb, var(--text-primary) 60%, transparent);
+}
+
+/* 触屏设备隐藏 */
 @media (pointer: coarse) {
   .cursor-glow { display: none; }
 }
 
-/* reduced motion 模式隐藏光晕 */
+/* reduced motion 模式隐藏 */
 @media (prefers-reduced-motion: reduce) {
   .cursor-glow { display: none; }
   *, *::before, *::after { cursor: auto !important; }
