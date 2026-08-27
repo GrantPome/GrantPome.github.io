@@ -947,6 +947,7 @@ body::after {
               border-color var(--dur-normal) var(--ease-fluent);
   border: 1px solid var(--border-subtle);
   transform-style: preserve-3d;
+  transform-origin: center center;
   will-change: transform;
 }
 
@@ -2013,4 +2014,65 @@ body::after,
   transition-property: background, background-color, border-color, color, box-shadow, fill, stroke;
   transition-duration: 300ms;
   transition-timing-function: var(--ease-fluent);
+}
+
+/* ============================================
+   全局光晕鼠标特效
+   ============================================ */
+
+/* 隐藏默认鼠标（仅精确指针设备） */
+@media (pointer: fine) {
+  *, *::before, *::after {
+    cursor: none !important;
+  }
+}
+
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    var(--accent-glow) 0%,
+    var(--glow-white) 30%,
+    transparent 65%
+  );
+  filter: blur(20px);
+  opacity: 0.6;
+  transition: width 0.3s var(--ease-spring),
+              height 0.3s var(--ease-spring),
+              opacity 0.3s var(--ease-fluent),
+              filter 0.3s var(--ease-fluent);
+  will-change: transform, width, height;
+}
+
+/* 按下时光晕聚集 */
+.cursor-glow.pressed {
+  width: 120px;
+  height: 120px;
+  opacity: 1;
+  filter: blur(8px);
+  background: radial-gradient(
+    circle,
+    var(--accent-glow) 0%,
+    var(--glow-white) 50%,
+    transparent 80%
+  );
+}
+
+/* 触屏设备隐藏光晕 */
+@media (pointer: coarse) {
+  .cursor-glow { display: none; }
+}
+
+/* reduced motion 模式隐藏光晕 */
+@media (prefers-reduced-motion: reduce) {
+  .cursor-glow { display: none; }
+  *, *::before, *::after { cursor: auto !important; }
 }
