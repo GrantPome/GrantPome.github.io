@@ -2,7 +2,13 @@
 (function () {
   "use strict";
 
-  // ---------- Hero 圆形粒子聚集成像特效（电影级序列） ----------
+  // 刷新时始终回到首屏顶部
+  if ("scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
+  }
+  window.scrollTo(0, 0);
+
+  // ---------- Hero 方形粒子聚集成像特效（电影级序列） ----------
   (function () {
     const canvas = document.getElementById("hero-particles");
     const heroBg = document.querySelector(".hero-bg");
@@ -257,12 +263,10 @@
 
           const alpha = Math.min(1, progress * 1.5);
 
-          // 圆形粒子
+          // 方形粒子
           ctx.globalAlpha = alpha;
           ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(x, y, p.size, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.fillRect(x - p.size, y - p.size, p.size * 2, p.size * 2);
         }
 
         ctx.globalAlpha = 1;
@@ -281,9 +285,12 @@
           const floatY = Math.cos(floatTime * FLOAT_SPEED * p.floatSpeed * 0.7 + p.floatPhase) * FLOAT_AMPLITUDE * 0.6;
 
           ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(p.targetX + floatX, p.targetY + floatY, p.size, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.fillRect(
+            p.targetX + floatX - p.size,
+            p.targetY + floatY - p.size,
+            p.size * 2,
+            p.size * 2
+          );
         }
       }
 
