@@ -544,6 +544,18 @@
   const grid = document.getElementById("works-grid");
   let activeCard = null; // 当前打开的卡片（用于隐藏/显示）
 
+  // 动态计算作品集最新更新日期
+  const latestDate = worksData
+    .map(w => new Date(w.date.replace(/\//g, "-")))
+    .reduce((max, d) => d > max ? d : max, new Date(0));
+  const updateEl = document.getElementById("works-last-update");
+  if (updateEl && latestDate.getTime() > 0) {
+    const y = latestDate.getFullYear();
+    const m = String(latestDate.getMonth() + 1).padStart(2, "0");
+    const d = String(latestDate.getDate()).padStart(2, "0");
+    updateEl.textContent = `${y}/${m}/${d}`;
+  }
+
   worksData.forEach((w, i) => {
     const card = document.createElement("div");
     card.className = "work-card fade-in";
