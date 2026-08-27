@@ -651,24 +651,27 @@
   );
   fadeEls.forEach((el) => observer.observe(el));
 
-  // ---------- 卡片鼠标光晕追踪（rAF 节流） ----------
-  const glowCards = document.querySelectorAll(".card, .grant-card, .work-card, .contact-card");
-  glowCards.forEach((card) => {
-    let rafId = null;
-    let targetX = 50, targetY = 50;
+  // ---------- 卡片鼠标光晕追踪（事件委托 + rAF 节流） ----------
+  let glowRafId = null;
+  let glowTargetEl = null;
+  let glowTargetX = 50, glowTargetY = 50;
 
-    const updateGlow = () => {
-      card.style.setProperty("--mouse-x", targetX + "%");
-      card.style.setProperty("--mouse-y", targetY + "%");
-      rafId = null;
-    };
+  const updateCardGlow = () => {
+    if (glowTargetEl) {
+      glowTargetEl.style.setProperty("--mouse-x", glowTargetX + "%");
+      glowTargetEl.style.setProperty("--mouse-y", glowTargetY + "%");
+    }
+    glowRafId = null;
+  };
 
-    card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
-      targetX = ((e.clientX - rect.left) / rect.width) * 100;
-      targetY = ((e.clientY - rect.top) / rect.height) * 100;
-      if (!rafId) rafId = requestAnimationFrame(updateGlow);
-    });
+  document.addEventListener("mousemove", (e) => {
+    const card = e.target.closest(".card, .grant-card, .work-card, .contact-card");
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    glowTargetX = ((e.clientX - rect.left) / rect.width) * 100;
+    glowTargetY = ((e.clientY - rect.top) / rect.height) * 100;
+    glowTargetEl = card;
+    if (!glowRafId) glowRafId = requestAnimationFrame(updateCardGlow);
   });
 
   // ---------- Hero CTA 3D 悬浮效果 ----------
