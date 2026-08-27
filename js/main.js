@@ -8,6 +8,54 @@
   }
   window.scrollTo(0, 0);
 
+  // ---------- 全局光晕鼠标特效 ----------
+  (function () {
+    const glow = document.getElementById("cursor-glow");
+    if (!glow) return;
+    // 触屏设备或 reduced motion 模式不启用
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let glowX = mouseX;
+    let glowY = mouseY;
+    let rafId = null;
+
+    // lerp 平滑跟随
+    const LERP = 0.18;
+    const animate = () => {
+      glowX += (mouseX - glowX) * LERP;
+      glowY += (mouseY - glowY) * LERP;
+      glow.style.transform = `translate(${glowX}px, ${glowY}px) translate(-50%, -50%)`;
+      rafId = requestAnimationFrame(animate);
+    };
+
+    window.addEventListener("mousemove", (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      if (!rafId) animate();
+    });
+
+    // 按下时光晕聚集
+    window.addEventListener("mousedown", () => {
+      glow.classList.add("pressed");
+    });
+    window.addEventListener("mouseup", () => {
+      glow.classList.remove("pressed");
+    });
+
+    // 鼠标离开页面时隐藏光晕
+    document.addEventListener("mouseleave", () => {
+      glow.style.opacity = "0";
+    });
+    document.addEventListener("mouseenter", () => {
+      glow.style.opacity = "";
+    });
+
+    animate();
+  })();
+
   // ---------- Hero 方形粒子聚集成像特效（电影级序列） ----------
   (function () {
     const canvas = document.getElementById("hero-particles");
