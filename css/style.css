@@ -1511,31 +1511,13 @@ body::after {
   color: var(--text-secondary);
   text-decoration: none;
   position: relative;
-  padding-left: 0;
   transition: color var(--dur-fast) var(--ease-fluent),
-              padding-left var(--dur-fast) var(--ease-fluent);
+              text-shadow var(--dur-fast) var(--ease-fluent);
 }
 
 .footer-col-list a:hover {
   color: var(--text-primary);
-  padding-left: 6px;
-}
-
-.footer-col-list a::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%) scaleX(0);
-  width: 4px;
-  height: 1px;
-  background: var(--text-primary);
-  transform-origin: left;
-  transition: transform var(--dur-fast) var(--ease-fluent);
-}
-
-.footer-col-list a:hover::before {
-  transform: translateY(-50%) scaleX(1);
+  text-shadow: 0 0 12px var(--accent-glow);
 }
 
 .footer-bottom {
