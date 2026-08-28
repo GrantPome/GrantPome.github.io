@@ -772,6 +772,16 @@
     updateEl.textContent = `${y}/${m}/${d}`;
   }
 
+  // 预加载所有作品图：<link rel="preload"> 在渲染卡片前立即发起请求，
+  // 图片进入浏览器缓存，卡片缩略图与弹窗大图打开时均即时显示（无缝）
+  worksData.forEach((w) => {
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = w.image;
+    document.head.appendChild(link);
+  });
+
   worksData.forEach((w, i) => {
     const card = document.createElement("div");
     card.className = "work-card fade-in";
