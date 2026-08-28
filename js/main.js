@@ -258,7 +258,6 @@
     };
 
     const img = new Image();
-    img.crossOrigin = "anonymous";
     let sequenceStarted = false;
 
     // 安全兜底：5 秒后无论如何都显示内容（防止图片加载失败导致页面空白）
@@ -358,14 +357,14 @@
 
           // 亮度决定粒子大小：亮处稍大，暗处稍小
           const brightness = (r + g + b) / 3 / 255;
-          const baseSize = SAMPLE_STEP * 0.4;
-          const size = baseSize + brightness * baseSize * 0.5 + Math.random() * 0.6;
+          const baseSize = SAMPLE_STEP * 0.55;
+          const size = baseSize + brightness * baseSize * 0.3;
 
           particles.push({
             x: startX,
             y: startY,
-            targetX: x + (Math.random() - 0.5) * 2,
-            targetY: y + (Math.random() - 0.5) * 2,
+            targetX: x,
+            targetY: y,
             color: `rgb(${r},${g},${b})`,
             delay: Math.random() * DELAY_RANGE,
             size: size,
