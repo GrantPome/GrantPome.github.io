@@ -90,4 +90,13 @@ const worksData = [
     image: "assets/work-10.jpg",
     link: "https://www.yuque.com/",
   },
+  {
+    id: 11,
+    title: "Grant Random Name 随机点名",
+    date: "2026/08/28",
+    tag: "Web 应用",
+    desc: "GRName 在线随机点名工具，独立部署的纯前端 Web 应用，支持名单管理与多种点名模式，界面采用现代玻璃拟态设计，亦可在移动端使用。",
+    image: "assets/grname.png",
+    link: "https://grantpome.github.io/GRName/",
+  },
 ];
