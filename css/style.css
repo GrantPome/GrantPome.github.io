@@ -639,6 +639,7 @@ body::after {
   transform: translateX(-50%);
   z-index: 2;
   display: flex;
+  border-radius: 8px;
   flex-direction: column;
   align-items: center;
   gap: 8px;
@@ -780,7 +781,7 @@ body::after {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
   opacity: 0;
-  transition: opacity var(--dur-normal) var(--ease-fluent);
+  transition: opacity 700ms var(--ease-fluent);
 }
 
 .about-item:hover {
@@ -792,6 +793,7 @@ body::after {
 
 .about-item:hover::before {
   opacity: 1;
+  transition: opacity var(--dur-normal) var(--ease-fluent);
 }
 
 .about-icon {
@@ -858,7 +860,7 @@ body::after {
   height: 2px;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
   opacity: 0;
-  transition: opacity var(--dur-slow) var(--ease-fluent);
+  transition: opacity 700ms var(--ease-fluent);
 }
 
 .card::after {
@@ -868,7 +870,7 @@ body::after {
   background: radial-gradient(500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
     rgba(255, 255, 255, 0.05), transparent 45%);
   opacity: 0;
-  transition: opacity var(--dur-slow) ease;
+  transition: opacity 700ms ease;
   pointer-events: none;
 }
 
@@ -879,8 +881,8 @@ body::after {
   box-shadow: var(--shadow-2);
 }
 
-.card:hover::before { opacity: 1; }
-.card:hover::after { opacity: 1; }
+.card:hover::before { opacity: 1; transition: opacity var(--dur-slow) var(--ease-fluent); }
+.card:hover::after { opacity: 1; transition: opacity var(--dur-slow) ease; }
 
 .card-num {
   font-size: 52px;
@@ -960,12 +962,12 @@ body::after {
   background: radial-gradient(300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
     color-mix(in srgb, var(--text-primary) 8%, transparent), transparent 50%);
   opacity: 0;
-  transition: opacity var(--dur-slow) ease;
+  transition: opacity 700ms ease;
   pointer-events: none;
   z-index: 1;
 }
 
-.work-card:hover::after { opacity: 1; }
+.work-card:hover::after { opacity: 1; transition: opacity var(--dur-slow) ease; }
 
 .work-card:hover {
   box-shadow: var(--shadow-2);
@@ -1159,7 +1161,7 @@ body::after {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
   opacity: 0;
-  transition: opacity var(--dur-slow) var(--ease-fluent);
+  transition: opacity 700ms var(--ease-fluent);
 }
 
 .grant-card::after {
@@ -1169,7 +1171,7 @@ body::after {
   background: radial-gradient(500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
     rgba(255, 255, 255, 0.04), transparent 45%);
   opacity: 0;
-  transition: opacity var(--dur-slow) ease;
+  transition: opacity 700ms ease;
   pointer-events: none;
 }
 
@@ -1180,8 +1182,8 @@ body::after {
   box-shadow: var(--shadow-2);
 }
 
-.grant-card:hover::before { opacity: 1; }
-.grant-card:hover::after { opacity: 1; }
+.grant-card:hover::before { opacity: 1; transition: opacity var(--dur-slow) var(--ease-fluent); }
+.grant-card:hover::after { opacity: 1; transition: opacity var(--dur-slow) ease; }
 
 .grant-card-icon {
   width: 36px;
@@ -1548,6 +1550,9 @@ body::after {
   color: var(--text-secondary);
   text-decoration: none;
   position: relative;
+  padding: 4px 8px;
+  border-radius: 6px;
+  overflow: visible;
   transition: color var(--dur-fast) var(--ease-fluent),
               text-shadow var(--dur-fast) var(--ease-fluent);
 }
@@ -1875,13 +1880,11 @@ body::after {
   height: 36px;
   border-radius: var(--radius-md);
   background: var(--theme-toggle-bg);
-  border: 1px solid var(--theme-toggle-border);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background var(--dur-fast) var(--ease-fluent),
-              border-color var(--dur-fast) var(--ease-fluent),
               transform var(--dur-fast) var(--ease-spring);
   flex-shrink: 0;
   margin-left: var(--space-2);
@@ -1889,7 +1892,6 @@ body::after {
 
 .theme-toggle:hover {
   background: var(--accent-soft);
-  border-color: var(--border-strong);
   transform: scale(1.05);
 }
 
@@ -2012,9 +2014,29 @@ body::after {
   border-color: var(--border-strong);
 }
 
-/* 卡片光晕渐变使用深色 */
+/* 关于我卡片：添加鼠标追踪光晕（与其他卡片一致） */
+.about-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.04), transparent 45%);
+  opacity: 0;
+  transition: opacity 700ms ease;
+  pointer-events: none;
+}
+
+.about-item:hover::after { opacity: 1; transition: opacity var(--dur-slow) ease; }
+
+[data-theme="light"] .about-item::after {
+  background: radial-gradient(500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(0, 0, 0, 0.04), transparent 45%);
+}
+
+/* 关于我卡片光晕渐变使用深色 */
 [data-theme="light"] .card::before,
-[data-theme="light"] .grant-card::before {
+[data-theme="light"] .grant-card::before,
+[data-theme="light"] .about-item::before {
   background: radial-gradient(
     300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
     rgba(0, 0, 0, 0.04), transparent 45%
@@ -2128,9 +2150,33 @@ body::after,
   border-color: rgba(128, 128, 128, 0.85);
 }
 
-/* 按钮粘连时光晕 */
+/* 按钮粘连时点状光晕（跟随鼠标，小于按钮 40%） */
 .btn-sticky-glow {
-  box-shadow: 0 0 40px color-mix(in srgb, var(--text-primary) 12%, transparent) !important;
+  background-image: radial-gradient(22px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    color-mix(in srgb, var(--text-primary) 25%, transparent), transparent) !important;
+}
+
+.btn-sticky-glow-sm {
+  background-image: radial-gradient(16px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    color-mix(in srgb, var(--text-primary) 25%, transparent), transparent) !important;
+}
+
+/* 页脚链接：用 ::after 让光晕可延伸到元素外部，避免裁剪 */
+.footer-col-list a.btn-sticky-glow,
+.footer-col-list a.btn-sticky-glow-sm {
+  background-image: none !important;
+}
+
+.footer-col-list a.btn-sticky-glow::after,
+.footer-col-list a.btn-sticky-glow-sm::after {
+  content: "";
+  position: absolute;
+  inset: -15px;
+  background: radial-gradient(22px circle at calc(var(--mouse-x-px, 0px) + 15px) calc(var(--mouse-y-px, 0px) + 15px),
+    color-mix(in srgb, var(--text-primary) 25%, transparent), transparent);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: -1;
 }
 
 /* 触屏设备隐藏 */

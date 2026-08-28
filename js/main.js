@@ -31,7 +31,7 @@
 
     const STICKY_FACTOR = 0.2;
 
-    const cardSelector = ".work-card, .contact-card, .grant-card, .card";
+    const cardSelector = ".work-card, .contact-card, .grant-card, .card, .about-item";
     const buttonSelector = "button, .theme-toggle, .modal-close, .nav-logo, .scroll-hint, .nav-links a, .footer-col-list a, .modal-btn";
 
     const animate = () => {
@@ -152,19 +152,27 @@
       glowY = mouseY;
 
       const isCircle = btn.classList.contains("modal-close") || btn.classList.contains("theme-toggle");
-      inner.style.width = btnRect.width + "px";
-      inner.style.height = btnRect.height + "px";
-      inner.style.borderRadius = isCircle ? "50%" : getComputedStyle(btn).borderRadius || "12px";
+      // 无背景/无框线按钮（如 scroll-hint、页脚链接）：光晕略大于目标（排除导航栏）
+      const cs = getComputedStyle(btn);
+      const inNavbar = btn.closest(".navbar");
+      const hasBg = cs.backgroundColor !== "rgba(0, 0, 0, 0)" && cs.backgroundColor !== "transparent";
+      const hasBorder = parseInt(cs.borderWidth) > 0;
+      const expand = (!inNavbar && !hasBg && !hasBorder) ? 8 : 0;
+      inner.style.width = (btnRect.width + expand) + "px";
+      inner.style.height = (btnRect.height + expand) + "px";
+      inner.style.borderRadius = isCircle ? "50%" : (cs.borderRadius && cs.borderRadius !== "0px" ? cs.borderRadius : "8px");
       inner.style.background = "rgba(128, 128, 128, 0.12)";
       inner.style.borderColor = "rgba(128, 128, 128, 0.4)";
 
-      btn.classList.add("btn-sticky-glow");
+      const isSmall = btnRect.width < 48 || btnRect.height < 48;
+      btn.classList.add(isSmall ? "btn-sticky-glow-sm" : "btn-sticky-glow");
     }
 
     function resetButton() {
       if (btnEl) {
         btnEl.style.translate = "";
         btnEl.classList.remove("btn-sticky-glow");
+        btnEl.classList.remove("btn-sticky-glow-sm");
       }
       inner.style.width = "";
       inner.style.height = "";
@@ -655,22 +663,27 @@
   let glowRafId = null;
   let glowTargetEl = null;
   let glowTargetX = 50, glowTargetY = 50;
+  let glowTargetPxX = 0, glowTargetPxY = 0;
 
   const updateCardGlow = () => {
     if (glowTargetEl) {
       glowTargetEl.style.setProperty("--mouse-x", glowTargetX + "%");
       glowTargetEl.style.setProperty("--mouse-y", glowTargetY + "%");
+      glowTargetEl.style.setProperty("--mouse-x-px", glowTargetPxX + "px");
+      glowTargetEl.style.setProperty("--mouse-y-px", glowTargetPxY + "px");
     }
     glowRafId = null;
   };
 
   document.addEventListener("mousemove", (e) => {
-    const card = e.target.closest(".card, .grant-card, .work-card, .contact-card");
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
+    const target = e.target.closest(".card, .grant-card, .work-card, .contact-card, .about-item, .btn-sticky-glow, .btn-sticky-glow-sm");
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
     glowTargetX = ((e.clientX - rect.left) / rect.width) * 100;
     glowTargetY = ((e.clientY - rect.top) / rect.height) * 100;
-    glowTargetEl = card;
+    glowTargetPxX = e.clientX - rect.left;
+    glowTargetPxY = e.clientY - rect.top;
+    glowTargetEl = target;
     if (!glowRafId) glowRafId = requestAnimationFrame(updateCardGlow);
   });
 
