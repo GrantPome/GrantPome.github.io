@@ -781,7 +781,7 @@
     card.style.transitionDelay = (i % 3) * 70 + Math.floor(i / 3) * 35 + "ms";
     card.innerHTML = `
       <div class="work-thumb">
-        <img src="${w.image}" alt="${w.title}" loading="lazy" decoding="async" />
+        <img src="${w.image}" alt="${w.title}" decoding="async" fetchpriority="high" />
       </div>
       <div class="work-body">
         <h3>${w.title}</h3>
@@ -949,7 +949,7 @@
 
     modalBody.innerHTML = `
       <div class="modal-thumb">
-        <img src="${work.image}" alt="${work.title}" />
+        <img src="${work.image}" alt="${work.title}" decoding="async" />
       </div>
       <h2 id="modal-title">${work.title}</h2>
       <p class="modal-date">${work.date} · ${work.tag}</p>
@@ -1159,13 +1159,11 @@
     if (e.key === "Escape" && modal.classList.contains("open")) closeModal();
   });
 
-  // ---------- 主题切换（浅色/深色） ----------
+  // ---------- 主题切换（浅色/深色）+ 水波纹动画 ----------
   const themeToggle = document.getElementById("theme-toggle");
   if (themeToggle) {
-    themeToggle.addEventListener("click", () => {
-      const current = document.documentElement.getAttribute("data-theme");
-      const next = current === "light" ? "dark" : "light";
-      if (next === "light") {
+    const applyTheme = (theme) => {
+      if (theme === "light") {
         document.documentElement.setAttribute("data-theme", "light");
         localStorage.setItem("theme", "light");
         document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f5f5f7");
@@ -1174,6 +1172,58 @@
         localStorage.setItem("theme", "dark");
         document.querySelector('meta[name="theme-color"]').setAttribute("content", "#000000");
       }
+    };
+
+    themeToggle.addEventListener("click", () => {
+      if (document.querySelector(".theme-ripple")) return;
+
+      const current = document.documentElement.getAttribute("data-theme");
+      const next = current === "light" ? "dark" : "light";
+      const rippleColor = next === "light" ? "#f5f5f7" : "#000000";
+
+      // 无障碍：减少动效时直接切换
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        applyTheme(next);
+        return;
+      }
+
+      // 计算按钮中心坐标
+      const rect = themeToggle.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+
+      // 计算覆盖视口的最大半径
+      const maxR = Math.hypot(
+        Math.max(cx, window.innerWidth - cx),
+        Math.max(cy, window.innerHeight - cy)
+      );
+
+      // 创建水波纹覆盖层
+      const overlay = document.createElement("div");
+      overlay.className = "theme-ripple";
+      overlay.style.background = rippleColor;
+      overlay.style.setProperty("--cx", cx + "px");
+      overlay.style.setProperty("--cy", cy + "px");
+      document.body.appendChild(overlay);
+
+      // 强制回流后启动扩展动画
+      overlay.offsetHeight;
+      overlay.style.clipPath = `circle(${maxR}px at ${cx}px ${cy}px)`;
+
+      // 扩展完成：切换主题 + 淡出
+      overlay.addEventListener("transitionend", function onExpand(e) {
+        if (e.propertyName !== "clip-path") return;
+        overlay.removeEventListener("transitionend", onExpand);
+
+        applyTheme(next);
+        overlay.style.opacity = "0";
+
+        overlay.addEventListener("transitionend", function onFade(e) {
+          if (e.propertyName !== "opacity") return;
+          overlay.removeEventListener("transitionend", onFade);
+          overlay.remove();
+        });
+      });
     });
   }
 

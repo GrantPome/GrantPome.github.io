@@ -6,7 +6,7 @@ const worksData = [
     date: "2026/04/07",
     tag: "UI 设计",
     desc: "学校政教处量化管理系统界面设计，包含班级量化登记、扣分查询、月度统计等功能模块，界面简洁清晰，便于老师快速操作。",
-    image: "assets/work-1.png",
+    image: "assets/work-1.jpg",
     link: null,
   },
   {
@@ -15,7 +15,7 @@ const worksData = [
     date: "2026/05/06",
     tag: "平面设计",
     desc: "三角洲行动同人创作，包含地图素材重绘与宣传海报设计，将游戏元素与现代排版结合，营造硬核战术氛围。",
-    image: "assets/work-2.png",
+    image: "assets/work-2.jpg",
     link: null,
   },
   {
@@ -24,7 +24,7 @@ const worksData = [
     date: "2026/05/06",
     tag: "编程猫作品",
     desc: "课堂随机点名小工具，支持自定义名单、抽取记录、多种抽取模式，界面简洁易用，适用于教学场景。",
-    image: "assets/work-3.png",
+    image: "assets/work-3.jpg",
     link: "https://shequ.codemao.cn/",
   },
   {
@@ -33,7 +33,7 @@ const worksData = [
     date: "2024/12/28",
     tag: "编程猫作品",
     desc: "社区举报中心概念设计，整合举报提交、进度追踪、违规记录等功能，作为风纪委员工作的辅助工具。",
-    image: "assets/work-4.png",
+    image: "assets/work-4.jpg",
     link: "https://shequ.codemao.cn/",
   },
   {
@@ -42,7 +42,7 @@ const worksData = [
     date: "2026/02/22",
     tag: "编程猫作品",
     desc: "深圳地铁屏蔽门互动模拟器，还原真实地铁屏蔽门开关动画与音效，可选择不同线路和站点，细节还原度高。",
-    image: "assets/work-5.png",
+    image: "assets/work-5.jpg",
     link: "https://shequ.codemao.cn/",
   },
   {
@@ -51,7 +51,7 @@ const worksData = [
     date: "2026/05/06",
     tag: "视觉设计",
     desc: "个人介绍卡片设计，简约 ins 风格，将个人信息、兴趣标签、联系方式整合在一张卡片中，适合社交平台展示。",
-    image: "assets/work-6.png",
+    image: "assets/work-6.jpg",
     link: null,
   },
   {
@@ -60,7 +60,7 @@ const worksData = [
     date: "2025/08/03",
     tag: "品牌设计",
     desc: "「石榴 Grant」个人品牌 Logo 设计，以石榴 Grant 首字母为核心元素，融合温暖的橙色调，传递活泼与创意的品牌调性。",
-    image: "assets/work-7.png",
+    image: "assets/work-7.jpg",
     link: null,
   },
   {
@@ -69,7 +69,7 @@ const worksData = [
     date: "2025/07/01",
     tag: "APP 设计",
     desc: "Pickcat 概念 APP 界面设计，一款趣味选图/决策类应用，界面采用清新卡通风格，交互流畅有趣。",
-    image: "assets/work-8.png",
+    image: "assets/work-8.jpg",
     link: null,
   },
   {
@@ -78,7 +78,7 @@ const worksData = [
     date: "2025/09/20",
     tag: "系统设计",
     desc: "GrantOS 个人操作系统概念设计与 EduOS 教育系统界面设计，探索操作系统的视觉语言与交互范式，包含桌面、应用、设置等完整体系。",
-    image: "assets/work-9.png",
+    image: "assets/work-9.jpg",
     link: null,
   },
   {
@@ -87,7 +87,7 @@ const worksData = [
     date: "2025/09/20",
     tag: "文档设计",
     desc: "编程猫社区行为守则视觉排版设计，将规则条文以清晰易读的版式呈现，配合插图和分区设计，提升阅读体验。",
-    image: "assets/work-10.png",
+    image: "assets/work-10.jpg",
     link: "https://www.yuque.com/",
   },
 ];
