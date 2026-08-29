@@ -933,6 +933,62 @@ body::after {
 /* ---------- 作品集 ---------- */
 .works-section { position: relative; }
 
+/* 作品分类筛选栏 */
+.works-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.works-filter-btn {
+  position: relative;
+  padding: 6px 15px;
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  line-height: 1.4;
+  cursor: pointer;
+  overflow: hidden;
+  transition: color var(--dur-fast) var(--ease-fluent),
+              border-color var(--dur-fast) var(--ease-fluent),
+              background var(--dur-normal) var(--ease-fluent),
+              box-shadow var(--dur-normal) var(--ease-fluent);
+}
+
+/* 鼠标跟随光晕（小按钮：16px 级，随指针高亮） */
+.works-filter-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(90px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    color-mix(in srgb, var(--text-primary) 20%, transparent), transparent 60%);
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+
+.works-filter-btn:hover::after { opacity: 1; }
+
+.works-filter-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+/* 选中分类：反白强调，光晕让位于实底 */
+.works-filter-btn.active {
+  background: var(--text-primary);
+  color: var(--bg-base);
+  border-color: transparent;
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+.works-filter-btn.active::after { opacity: 0; }
+
 .works-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -2165,7 +2221,8 @@ body::after,
   transform: translate(-50%, -50%);
   transition: width 0.3s var(--ease-spring),
               height 0.3s var(--ease-spring),
-              border-radius 0.3s var(--ease-spring),
+              /* 圆角先于宽高归位：从按钮圆角切回圆形时避免中间态呈方形 */
+              border-radius 0.12s var(--ease-fluent),
               background 0.3s var(--ease-fluent),
               border-color 0.3s var(--ease-fluent);
   will-change: transform, width, height;

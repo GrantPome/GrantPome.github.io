@@ -683,7 +683,7 @@
   };
 
   document.addEventListener("mousemove", (e) => {
-    const target = e.target.closest(".card, .grant-card, .work-card, .contact-card, .about-item, .btn-sticky-glow, .btn-sticky-glow-sm");
+    const target = e.target.closest(".card, .grant-card, .work-card, .contact-card, .about-item, .btn-sticky-glow, .btn-sticky-glow-sm, .works-filter-btn");
     if (!target) return;
     const rect = target.getBoundingClientRect();
     glowTargetX = ((e.clientX - rect.left) / rect.width) * 100;
@@ -787,7 +787,8 @@
     img.src = w.image;
   });
 
-  worksData.forEach((w, i) => {
+  // 生成单张作品卡片（含 3D 倾斜 + 事件绑定），供分组筛选时重建复用
+  const buildWorkCard = (w, i) => {
     const card = document.createElement("div");
     card.className = "work-card fade-in";
     card.setAttribute("role", "listitem");
@@ -910,9 +911,52 @@
       }
     });
 
-    grid.appendChild(card);
-    observer.observe(card);
+    return card;
+  };
+
+  // ---------- 作品集分类筛选（按作品 tag 动态生成） ----------
+  const filterBar = document.getElementById("works-filters");
+  const FILTER_ALL = "全部";
+  const categories = [FILTER_ALL, ...new Set(worksData.map((w) => w.tag))];
+  let activeFilter = FILTER_ALL;
+
+  // 依据当前分类重建网格（重建时重新观察 fade-in 实现入场）
+  const renderWorks = () => {
+    grid.innerHTML = "";
+    const items =
+      activeFilter === FILTER_ALL
+        ? worksData
+        : worksData.filter((w) => w.tag === activeFilter);
+    items.forEach((w, i) => {
+      const card = buildWorkCard(w, i);
+      grid.appendChild(card);
+      observer.observe(card);
+    });
+  };
+
+  categories.forEach((tag) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "works-filter-btn";
+    btn.dataset.filter = tag;
+    btn.setAttribute("role", "tab");
+    btn.setAttribute("aria-selected", tag === FILTER_ALL ? "true" : "false");
+    btn.textContent = tag;
+    btn.addEventListener("click", () => {
+      if (tag === activeFilter) return;
+      activeFilter = tag;
+      filterBar.querySelectorAll(".works-filter-btn").forEach((b) => {
+        const on = b.dataset.filter === tag;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      renderWorks();
+    });
+    if (tag === FILTER_ALL) btn.classList.add("active");
+    filterBar.appendChild(btn);
   });
+
+  renderWorks();
 
   // ---------- 作品详情弹窗（非线性连贯动画 · 优化版） ----------
   const modal = document.getElementById("work-modal");
