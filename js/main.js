@@ -772,14 +772,19 @@
     updateEl.textContent = `${y}/${m}/${d}`;
   }
 
-  // 预加载所有作品图：<link rel="preload"> 在渲染卡片前立即发起请求，
-  // 图片进入浏览器缓存，卡片缩略图与弹窗大图打开时均即时显示（无缝）
+  // 预加载作品集全部详情素材并提前解码：
+  // 弹窗内的标题/日期/标签/描述为内存数据即时可用，此处针对弹窗大图做
+  // <link rel="preload"> 请求 + Image() 提前解码，打开详情时图片已就绪、无缝显示
   worksData.forEach((w) => {
     const link = document.createElement("link");
     link.rel = "preload";
     link.as = "image";
     link.href = w.image;
     document.head.appendChild(link);
+
+    const img = new Image();
+    img.decoding = "async";
+    img.src = w.image;
   });
 
   worksData.forEach((w, i) => {
