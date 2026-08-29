@@ -2087,9 +2087,13 @@ body::after {
   color: var(--text-tertiary);
 }
 
-/* 按钮和标签 */
-[data-theme="light"] .modal-btn {
+/* 浅色覆盖需提升特异性（>= .modal-body a.modal-btn），否则 color 不生效导致黑底黑字 */
+[data-theme="light"] .modal-body a.modal-btn {
   background: var(--text-primary);
+  color: #ffffff;
+}
+
+[data-theme="light"] .modal-body a.modal-btn:hover {
   color: #ffffff;
 }
 
