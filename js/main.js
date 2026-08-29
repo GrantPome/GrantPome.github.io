@@ -971,7 +971,7 @@
       <p class="modal-desc">${work.desc}</p>
       ${work.link
         ? `<a href="${work.link}" target="_blank" rel="noopener" class="modal-btn">查看链接 →</a>`
-        : `<span style="color:var(--text-tertiary);font-size:12px">暂无链接</span>`}
+        : `<span class="modal-btn modal-btn-disabled" aria-disabled="true">暂无链接</span>`}
     `;
 
     originRect = {

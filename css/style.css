@@ -1736,6 +1736,26 @@ body::after {
   box-shadow: 0 4px 12px rgba(255, 255, 255, 0.12);
 }
 
+/* 无链接作品的"暂无链接"禁用样式：成型的胶囊，深/浅主题均清晰可读 */
+.modal-body .modal-btn-disabled {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: default;
+  user-select: none;
+}
+
+[data-theme="light"] .modal-btn-disabled {
+  border-color: rgba(0, 0, 0, 0.14);
+}
+
 /* ---------- 入场动画 ---------- */
 .fade-in {
   opacity: 0;
