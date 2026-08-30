@@ -920,18 +920,36 @@
   const categories = [FILTER_ALL, ...new Set(worksData.map((w) => w.tag))];
   let activeFilter = FILTER_ALL;
 
-  // 依据当前分类重建网格（重建时重新观察 fade-in 实现入场）
-  const renderWorks = () => {
-    grid.innerHTML = "";
-    const items =
-      activeFilter === FILTER_ALL
-        ? worksData
-        : worksData.filter((w) => w.tag === activeFilter);
-    items.forEach((w, i) => {
-      const card = buildWorkCard(w, i);
-      grid.appendChild(card);
-      observer.observe(card);
-    });
+  // 依据当前分类重建网格；切换筛选时播放"退场缩小淡化 + 入场放大清晰"动画
+  let animTimer = null;
+  const renderWorks = (anim) => {
+    const rebuild = () => {
+      animTimer = null;
+      grid.innerHTML = "";
+      const items =
+        activeFilter === FILTER_ALL
+          ? worksData
+          : worksData.filter((w) => w.tag === activeFilter);
+      items.forEach((w, i) => {
+        const card = buildWorkCard(w, i);
+        grid.appendChild(card);
+        if (anim) {
+          // 入场：CSS 动画自动从"模糊 + 缩小"过渡到"清晰 + 放大"
+          card.classList.remove("fade-in");
+          card.classList.add("works-in");
+        } else {
+          observer.observe(card);
+        }
+      });
+    };
+
+    if (!anim) {
+      rebuild();
+      return;
+    }
+    if (animTimer) return; // 退场播放中：等动画结束后按最新分类重建
+    [...grid.children].forEach((c) => c.classList.add("works-exit"));
+    animTimer = setTimeout(rebuild, 300);
   };
 
   categories.forEach((tag) => {
@@ -950,7 +968,7 @@
         b.classList.toggle("active", on);
         b.setAttribute("aria-selected", on ? "true" : "false");
       });
-      renderWorks();
+      renderWorks(true);
     });
     if (tag === FILTER_ALL) btn.classList.add("active");
     filterBar.appendChild(btn);

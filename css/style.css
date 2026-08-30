@@ -989,6 +989,19 @@ body::after {
 }
 .works-filter-btn.active::after { opacity: 0; }
 
+/* 分类切换动画：退场（模糊 + 缩小淡出）、入场（从模糊 + 缩小到清晰 + 放大） */
+@keyframes works-in {
+  from { filter: blur(12px); opacity: 0; transform: scale(0.9); }
+  to   { filter: blur(0);   opacity: 1; transform: scale(1); }
+}
+/* 入场动画结束后不保留终态（无 fill），让 transform 交还 JS 的 3D 倾斜逻辑 */
+.works-in { animation: works-in 0.4s var(--ease-fluent); }
+
+@keyframes works-exit {
+  to { filter: blur(12px); opacity: 0; transform: scale(0.88); }
+}
+.works-exit { animation: works-exit 0.3s var(--ease-fluent) both; }
+
 .works-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
