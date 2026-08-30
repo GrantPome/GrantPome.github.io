@@ -930,6 +930,24 @@ body::after {
 .card:hover .card-link { gap: 6px; }
 .card:hover .card-link::after { transform: translateX(2px); }
 
+/* ===== 点击水波：光影从点击点扩散到整个板块（.card/.grant-card/.contact-card） ===== */
+.ripple {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.5;
+  transform: translate(-50%, -50%) scale(0);
+  background: radial-gradient(circle, var(--accent-glow, rgba(255,255,255,0.18)), transparent 65%);
+}
+.ripple.pop {
+  transition: transform 600ms ease-out, opacity 500ms ease;
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0;
+}
+
 /* ---------- 作品集 ---------- */
 .works-section { position: relative; }
 

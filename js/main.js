@@ -105,6 +105,23 @@
       }
     });
 
+    // ===== 点击水波：光影从点击点扩散到整个板块（.card/.grant-card/.work-card/.contact-card） =====
+    document.addEventListener("click", (e) => {
+      const el = e.target.closest(".card, .grant-card, .work-card, .contact-card");
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const ripple = document.createElement("div");
+      ripple.className = "ripple";
+      const size = Math.max(r.width, r.height) * 2.4;
+      ripple.style.left = (e.clientX - r.left) + "px";
+      ripple.style.top = (e.clientY - r.top) + "px";
+      ripple.style.width = size + "px";
+      ripple.style.height = size + "px";
+      el.appendChild(ripple);
+      requestAnimationFrame(() => requestAnimationFrame(() => ripple.classList.add("pop")));
+      setTimeout(() => ripple.remove(), 700);
+    });
+
     document.addEventListener("mouseout", (e) => {
       // 按钮离开
       if (mode === "button" && btnEl) {

@@ -1,0 +1,146 @@
+/* ============================================================
+   Luma・Gran 流光 — 可复用设计令牌（Design Tokens）
+   深色默认 + 浅色 [data-theme="light"]，同一套变量两主题自动适配。
+   使用：<link rel="stylesheet" href="docs/design-tokens.css">
+   ============================================================ */
+
+:root {
+  /* ---------- 色彩：深色（默认） ---------- */
+  --bg-base: #000000;            /* 页面底色 */
+  --bg-layer: #0a0a0c;           /* 次级层 */
+  --bg-card: #121216;            /* 卡片 */
+  --bg-card-hover: #1a1a20;      /* 卡片悬停 */
+  --bg-acrylic: rgba(20, 20, 26, 0.5);  /* 丙烯酸玻璃 */
+  --bg-mica: rgba(10, 10, 14, 0.65);    /* 云母背景 */
+
+  /* 边框 3 层（由细到粗） */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  /* 文字 4 层 */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.72);
+  --text-tertiary: rgba(255, 255, 255, 0.45);
+  --text-disabled: rgba(255, 255, 255, 0.25);
+
+  /* 强调（纯白，极简微光） */
+  --accent: #ffffff;
+  --accent-light: #e5e5e5;
+  --accent-dark: #b3b3b3;
+  --accent-glow: rgba(255, 255, 255, 0.18);
+  --accent-soft: rgba(255, 255, 255, 0.08);
+
+  /* 光场微光 */
+  --glow-white: rgba(255, 255, 255, 0.05);
+  --glow-gray: rgba(180, 180, 200, 0.035);
+
+  /* ---------- 间距（4px 基准） ---------- */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-7: 28px; --space-8: 32px;
+  --space-9: 36px; --space-10: 40px; --space-12: 48px; --space-16: 64px;
+  --space-20: 80px;
+
+  /* ---------- 圆角 ---------- */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+
+  /* ---------- 阴影 ---------- */
+  --shadow-1: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px rgba(0,0,0,.15);
+  --shadow-2: 0 4px 8px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  --shadow-3: 0 12px 24px rgba(0,0,0,.4), 0 24px 64px rgba(0,0,0,.35);
+  --shadow-glow: 0 0 24px rgba(255,255,255,.1);
+
+  /* ---------- 动效曲线 ---------- */
+  --ease-fluent: cubic-bezier(0.1, 0.9, 0.2, 1);     /* 标准 Fluent */
+  --ease-fluent-in: cubic-bezier(0.7, 0, 0.9, 0.3);  /* 进入减速 */
+  --ease-fluent-out: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);  /* 回弹 */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);       /* 软缓动 */
+
+  /* ---------- 动效时长 ---------- */
+  --dur-fast: 150ms;
+  --dur-normal: 250ms;
+  --dur-slow: 400ms;
+  --dur-slower: 600ms;
+
+  /* ---------- 排版（HarmonyOS Sans SC） ---------- */
+  --fs-hero: clamp(36px, 6vw, 56px);
+  --fs-h1: clamp(28px, 4vw, 40px);
+  --fs-h2: clamp(22px, 3vw, 28px);
+  --fs-h3: 18px;
+  --fs-body: 14px;
+  --fs-small: 12.5px;
+  --fs-caption: 11px;
+
+  /* 组件专用覆盖 */
+  --focus-ring: rgba(255, 255, 255, 0.6);
+  --noise-dot: rgba(255, 255, 255, 0.012);
+  --theme-toggle-bg: rgba(255, 255, 255, 0.06);
+  --theme-toggle-border: rgba(255, 255, 255, 0.1);
+  --modal-backdrop-bg: rgba(0, 0, 0, 0.5);
+  --navbar-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --hero-text-shadow: 0 2px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* ================= 浅色模式 ================= */
+[data-theme="light"] {
+  --bg-base: #f5f5f7;
+  --bg-layer: #ebebef;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f0f4;
+  --bg-acrylic: rgba(255, 255, 255, 0.6);
+  --bg-mica: rgba(245, 245, 247, 0.75);
+
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-default: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.16);
+
+  --text-primary: #000000;
+  --text-secondary: rgba(0, 0, 0, 0.72);
+  --text-tertiary: rgba(0, 0, 0, 0.45);
+  --text-disabled: rgba(0, 0, 0, 0.25);
+
+  --accent: #1a1a1a;
+  --accent-light: #333333;
+  --accent-dark: #555555;
+  --accent-glow: rgba(0, 0, 0, 0.14);
+  --accent-soft: rgba(0, 0, 0, 0.06);
+
+  --glow-white: rgba(0, 0, 0, 0.04);
+  --glow-gray: rgba(120, 120, 140, 0.04);
+
+  --shadow-glow: 0 0 24px rgba(0, 0, 0, 0.08);
+  --focus-ring: rgba(0, 0, 0, 0.5);
+  --noise-dot: rgba(0, 0, 0, 0.02);
+  --theme-toggle-bg: rgba(0, 0, 0, 0.05);
+  --theme-toggle-border: rgba(0, 0, 0, 0.1);
+  --modal-backdrop-bg: rgba(0, 0, 0, 0.35);
+  --navbar-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --hero-text-shadow: 0 2px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* ---------- 通用字体声明（HarmonyOS Sans SC，可选） ----------
+@font-face {
+  font-family: "HarmonyOS Sans SC";
+  src: url("assets/fonts/HarmonyOS_Sans_SC.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+body { font-family: "HarmonyOS Sans SC", system-ui, -apple-system, sans-serif; }
+*/
+
+/* ---------- 常用微光 hover（链接/图标：高亮 + 辉光，非位移） ----------
+a, button { transition: color var(--dur-fast) var(--ease-fluent),
+                         border-color var(--dur-fast) var(--ease-fluent),
+                         box-shadow var(--dur-normal) var(--ease-fluent); }
+a:hover, button:hover {
+  color: var(--text-primary);
+  box-shadow: 0 0 12px var(--accent-glow);
+  border-color: var(--border-strong);
+}
+*/

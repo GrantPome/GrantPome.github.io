@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luma・Gran 流光 · 可复用验证示例</title>
+
+  <!-- 真实引用提炼出的设计令牌，验证复用性 -->
+  <link rel="stylesheet" href="../docs/design-tokens.css" />
+
+  <style>
+    /* ===== 使用提供的鸿蒙字体（HarmonyOS Sans SC） ===== */
+    @font-face {
+      font-family: "HarmonyOS Sans SC";
+      src: url("../assets/fonts/HarmonyOS_Sans_SC.ttf") format("truetype");
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    /* ===== 基础 ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "HarmonyOS Sans SC", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg-mica);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: background var(--dur-slower) var(--ease-fluent), color var(--dur-slower) var(--ease-fluent);
+      overflow-x: hidden;
+    }
+    /* 云母质感底层 */
+    .mica-layer {
+      position: fixed; inset: 0; z-index: -1;
+      background:
+        radial-gradient(1200px 600px at 12% -10%, var(--glow-white), transparent 60%),
+        radial-gradient(900px 500px at 105% 15%, var(--glow-gray), transparent 55%),
+        var(--bg-base);
+    }
+    a { color: var(--text-secondary); text-decoration: none;
+        transition: color var(--dur-fast) var(--ease-fluent), box-shadow var(--dur-normal) var(--ease-fluent); }
+    a:hover { color: var(--text-primary); box-shadow: 0 0 12px var(--accent-glow); }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--space-6); }
+    section { padding: var(--space-20) 0; }
+
+    /* ===== 导航 ===== */
+    header.nav {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
+      background: color-mix(in srgb, var(--bg-mica) 70%, transparent);
+      border-bottom: 1px solid var(--border-subtle);
+      box-shadow: var(--navbar-shadow);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .logo { display: flex; align-items: center; gap: var(--space-2); font-weight: 600; color: var(--text-primary); }
+    .logo svg, .logo .brand-svg { fill: currentColor; }
+    .logo .brand-svg { height: 18px; width: auto; flex: none; }
+    .logo:hover { box-shadow: none; }
+    .nav-links { display: flex; gap: var(--space-6); }
+    .theme-toggle {
+      width: 36px; height: 36px; border-radius: var(--radius-md);
+      border: 1px solid var(--theme-toggle-border);
+      background: var(--theme-toggle-bg); color: var(--text-primary);
+      cursor: pointer; display: grid; place-items: center;
+      transition: color var(--dur-fast) var(--ease-fluent), border-color var(--dur-fast) var(--ease-fluent),
+                  box-shadow var(--dur-normal) var(--ease-fluent);
+    }
+    .theme-toggle:hover { border-color: var(--border-strong); box-shadow: 0 0 14px var(--accent-glow); }
+    .theme-toggle svg { width: 18px; height: 18px; fill: currentColor; }
+
+    /* ===== Hero ===== */
+    .hero { padding: clamp(72px, 12vh, 132px) 0; }
+    .hero h1 { font-size: var(--fs-hero); font-weight: 800; letter-spacing: -0.02em;
+       background: linear-gradient(180deg, var(--text-primary), var(--text-tertiary));
+       -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero p { margin-top: var(--space-4); max-width: 460px; color: var(--text-secondary); font-size: var(--fs-h3); }
+    .hero-actions { margin-top: var(--space-8); display: flex; gap: var(--space-3); flex-wrap: wrap; }
+
+    /* ===== 按钮（微光 hover） ===== */
+    .btn {
+      --mouse-x: 50%; --mouse-y: 50%;
+      position: relative; overflow: hidden;
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: 10px 20px; border-radius: var(--radius-lg);
+      font: inherit; font-weight: 600; cursor: pointer;
+      transition: color var(--dur-fast) var(--ease-fluent), background var(--dur-normal) var(--ease-fluent),
+                  box-shadow var(--dur-normal) var(--ease-fluent), border-color var(--dur-fast) var(--ease-fluent);
+    }
+    .btn::before { content: ""; position: absolute; inset: 0; border-radius: inherit;
+      background: radial-gradient(160px circle at var(--mouse-x) var(--mouse-y),
+        color-mix(in srgb, var(--text-primary) 16%, transparent), transparent 60%);
+      opacity: 0; transition: opacity 200ms ease; }
+    .btn:hover::before { opacity: 1; }
+    .btn-primary { background: var(--text-primary); color: var(--bg-base); border: none; }
+    .btn-primary:hover { box-shadow: 0 0 16px var(--accent-glow); }
+    .btn-ghost { background: transparent; color: var(--text-primary); border: 1px solid var(--border-default); }
+    .btn-ghost:hover { border-color: var(--border-strong); box-shadow: 0 0 12px var(--accent-glow); }
+
+    /* ===== 玻璃拟态卡片（光晕跟随） ===== */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-4); perspective: 1200px; }
+    .card {
+      --mouse-x: 50%; --mouse-y: 50%;
+      position: relative; overflow: hidden;
+      padding: var(--space-6); border-radius: var(--radius-xl);
+      background: color-mix(in srgb, var(--bg-card) 82%, transparent);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-2);
+      transform-style: preserve-3d; will-change: transform;
+      transition: border-color var(--dur-fast) var(--ease-fluent), box-shadow var(--dur-normal) var(--ease-fluent);
+    }
+    .card::before { content: ""; position: absolute; inset: 0; border-radius: inherit;
+      background: radial-gradient(360px circle at var(--mouse-x) var(--mouse-y),
+        color-mix(in srgb, var(--accent-glow) 85%, transparent), transparent 80%);
+      opacity: 0; transition: opacity 250ms ease; }
+    .card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-3); }
+    .card:hover::before { opacity: 1; }
+    .card .ic { width: 42px; height: 42px; border-radius: var(--radius-md);
+      display: grid; place-items: center; background: var(--bg-card-hover);
+      color: var(--text-primary); margin-bottom: var(--space-4); }
+    .card .ic svg { width: 22px; height: 22px; fill: currentColor; }
+    .card h3 { font-size: var(--fs-h3); font-weight: 700; }
+    .card p { margin-top: var(--space-2); color: var(--text-secondary); font-size: var(--fs-body); }
+    .card .meta { margin-top: var(--space-4); font-size: var(--fs-small); color: var(--text-tertiary); }
+
+    /* ===== 标签 chips ===== */
+    .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    .chip { padding: 6px 14px; border-radius: 999px; font-size: var(--fs-small);
+      border: 1px solid var(--border-default); color: var(--text-secondary); cursor: pointer;
+      transition: color var(--dur-fast) var(--ease-fluent), border-color var(--dur-fast) var(--ease-fluent),
+                  box-shadow var(--dur-normal) var(--ease-fluent), background var(--dur-normal) var(--ease-fluent); }
+    .chip:hover { color: var(--text-primary); border-color: var(--border-strong); box-shadow: 0 0 12px var(--accent-glow); }
+    .chip.active { background: var(--text-primary); color: var(--bg-base); border-color: transparent; }
+
+    /* ===== 分段 Tab 栏（粘滞跟随的可操作组件） ===== */
+    .segmented {
+      display: inline-flex; gap: 2px; padding: 3px;
+      background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-1);
+    }
+    .segmented .tab {
+      padding: 7px 16px; border-radius: var(--radius-md);
+      font: inherit; font-size: var(--fs-body); font-weight: 500;
+      color: var(--text-secondary); background: transparent; border: none; cursor: pointer;
+      transition: color var(--dur-fast) var(--ease-fluent), background var(--dur-normal) var(--ease-fluent),
+                  box-shadow var(--dur-normal) var(--ease-fluent);
+    }
+    .segmented .tab:hover { color: var(--text-primary); }
+    .segmented .tab.active {
+      background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+      color: var(--text-primary); font-weight: 600; box-shadow: var(--shadow-1);
+    }
+
+    /* ===== 数据面板（玻璃 + 动效 + 光晕跟随） ===== */
+    .panel { position: relative; overflow: hidden; padding: var(--space-8); border-radius: var(--radius-2xl);
+      background: var(--bg-acrylic); backdrop-filter: blur(20px) saturate(130%); -webkit-backdrop-filter: blur(20px) saturate(130%);
+      border: 1px solid var(--border-default); }
+    .panel::before { content: ""; position: absolute; inset: 0; border-radius: inherit;
+      background: radial-gradient(360px circle at var(--mouse-x) var(--mouse-y),
+        color-mix(in srgb, var(--accent-glow) 85%, transparent), transparent 80%);
+      opacity: 0; transition: opacity 250ms ease; pointer-events: none; }
+    .panel:hover::before { opacity: 1; }
+    /* 点击水波：光影从点击点扩散到整个板块，凭 overflow:hidden 裁切在板块内 */
+    .ripple {
+      position: absolute; width: 12px; height: 12px; border-radius: 50%;
+      pointer-events: none; z-index: 1; opacity: 0.5;
+      transform: translate(-50%, -50%) scale(0);
+      background: radial-gradient(circle, var(--accent-glow), transparent 65%);
+    }
+    .ripple.pop {
+      transition: transform 600ms ease-out, opacity 500ms ease;
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0;
+    }
+    .panel h2 { font-size: var(--fs-h2); margin-bottom: var(--space-3); }
+    .stats { display: flex; gap: var(--space-8); margin-top: var(--space-4); flex-wrap: wrap; }
+    .stat b { font-size: var(--fs-hero); font-weight: 800; display: block;
+      background: linear-gradient(180deg, var(--text-primary), var(--text-tertiary));
+      -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .stat span { color: var(--text-tertiary); font-size: var(--fs-small); }
+
+    /* ===== 主题切换水波纹遮罩 ===== */
+    .theme-ripple { position: fixed; z-index: 999; pointer-events: none; border-radius: 50%;
+      transform: scale(0); transform-origin: center;
+      background: var(--bg-base);
+      transition: transform 600ms var(--ease-fluent-out), opacity 300ms var(--ease-fluent); }
+
+    footer { padding: var(--space-10) 0; border-top: 1px solid var(--border-subtle);
+      color: var(--text-tertiary); display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+
+    .sec-title { font-size: var(--fs-h1); font-weight: 800; margin-bottom: var(--space-6); }
+
+    /* ===== 鼠标球（三态：normal / card / button） =====
+       点锚方案：容器是 0×0 锚点，inner/光环用 translate(-50%,-50%) 居中，
+       与主站一致，确保球心精确贴住光标，不随容器尺寸偏移 */
+    /* 启用自绘鼠标球时，全局隐藏原生光标（含卡片/大板块，否则移入仍现箭头） */
+    body.sel-active, body.sel-active * { cursor: none !important; }
+    .cursor-glow {
+      position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 9998;
+      pointer-events: none;
+      transform: translate(-9999px, -9999px);
+      will-change: transform;
+      transition: opacity 0.2s var(--ease-fluent);
+    }
+    /* 微光环：不常驻（默认 opacity 0），常态不显示；尺寸由 button 模式用 --gw/--gh 撑到控件大小 */
+    .cursor-glow::before {
+      content: ""; position: absolute; top: 0; left: 0;
+      width: var(--gw, 56px); height: var(--gh, 56px); border-radius: 50%;
+      background: radial-gradient(circle,
+        color-mix(in srgb, var(--text-primary) 9%, transparent) 45%, transparent 72%);
+      opacity: 0;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.2s var(--ease-fluent), transform 0.3s var(--ease-fluent);
+    }
+    /* 实体球：默认 22 正圆，三态时被 JS 改写 */
+    .cursor-glow-inner {
+      position: absolute; top: 0; left: 0;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(128, 128, 128, 0.22);
+      border: 1.5px solid rgba(128, 128, 128, 0.5);
+      overflow: hidden;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s var(--ease-spring), height 0.3s var(--ease-spring),
+                  border-radius 0.12s var(--ease-fluent),
+                  background 0.3s var(--ease-fluent), border-color 0.3s var(--ease-fluent),
+                  box-shadow 0.3s var(--ease-fluent), opacity 0.2s ease;
+    }
+    /* 选中框内部辉光：随鼠标位置移动，凭 border-radius 裁切在选中框内 */
+    .cursor-glow-inner::after {
+      content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      background: radial-gradient(var(--spot-r, 140px) circle at var(--spot-x, 50%) var(--spot-y, 50%),
+        rgba(128, 128, 128, 0.30), transparent 72%);
+      opacity: 0; transition: opacity 0.2s var(--ease-fluent);
+    }
+    /* card / 大板块 模式：整球彻底隐藏（实体球 + 光环都不可见），由卡片自身辉光接管反馈 */
+    .cursor-glow.card { opacity: 0; }
+    /* button 粘滞模式：内部辉光随鼠标移动，裁切在选中框内（不再有框外溢出的微光环） */
+    .cursor-glow.button .cursor-glow-inner { background: rgba(128, 128, 128, 0.10); }
+    .cursor-glow.button .cursor-glow-inner::after { opacity: 1; }
+
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="mica-layer"></div>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="#">
+        <svg class="brand-svg" viewBox="0 0 605 128" aria-hidden="true">
+          <rect x="53.67742156982422" y="0" width="37.161293029785156" height="27.675676345825195" rx="10" fill="currentColor"/>
+          <path d="M54.5,62.50000008203125L86.5,62.00000008203125L86.820896,60.08557508203125C87.84306000000001,53.98749728203125,83.141638,48.43243408203125,76.958487,48.43243408203125L64.85565700000001,48.43243408203125C59.6407166,48.43243408203125,55.30129206,52.43996238203125,54.88722825,57.63843818203125L54.5,62.50000008203125Z" fill="currentColor"/>
+          <rect x="0" y="100.32432556152344" width="128" height="27.675676345825195" rx="10" fill="currentColor"/>
+          <path fill-rule="evenodd" d="M62.3038464473877,49.20319219165039Q47.42555044738769,78.28812069165039,9.225419047387696,102.80014469165039L23.806841847387695,125.5241886916504Q68.1428474477,97.07493569165038,86.34134144738769,61.49949029165039L62.3038464473877,49.20319219165039Z" fill="currentColor"/>
+          <g transform="matrix(-1,0,0,-1,574,256)">
+            <rect x="287.0001220703125" y="178.26953125" width="36.571388244628906" height="77.33773803710938" rx="0" fill="currentColor"/>
+            <path d="M287,236.66556549072266L287,256.00000049072264L332.714237,256.00000049072264L332.714237,246.66556649072265C332.714237,241.14271829072266,328.237083,236.66556549072266,322.714237,236.66556549072266L287,236.66556549072266Z" fill="currentColor"/>
+            <path d="M369.2856979370117,256.00000049072264L414.99993493701174,256.00000049072264L414.99993493701174,236.66556549072266L379.2856989370117,236.66556549072266C373.7628507370117,236.66556549072266,369.2856979370117,241.14271829072266,369.2856979370117,246.66556649072265L369.2856979370117,256.00000049072264Z" fill="currentColor"/>
+            <rect x="378.4286117553711" y="178.26953125" width="36.571388244628906" height="77.33773803710938" rx="0" fill="currentColor"/>
+            <path d="M414.9999820703125,180.202976C414.9999820703125,173.280434,413.3760820703125,166.621361,410.1282820703125,160.225761C406.8804820703125,153.830166,402.2559920703125,148.184877,396.2548320703125,143.289898C390.2536820703125,138.394919,383.3326570703125,134.622859,375.4917680703125,131.9737167C367.6508790703125,129.3245723,359.4869770703125,128.0000012715658,351.0000530703125,128.0000038146973C342.5131380703125,128.0000025431316,334.3492320703125,129.3245735,326.5083430703125,131.9737129C318.6674520703125,134.6228576,311.7464270703125,138.394919,305.7452700703125,143.289898C299.7441130703125,148.184877,295.1196346703125,153.830166,291.8718337703125,160.225761C288.6240247703125,166.621361,287.0001220703125,173.280434,287.0001220703125,180.202976L323.5198360703125,180.202976C323.5198360703125,177.230583,324.2171100703125,174.371319,325.6116480703125,171.625183C327.0061870703125,168.879051,328.9918400703125,166.455086,331.5686110703125,164.353283C334.1453780703125,162.251488,337.11711907031247,160.631844,340.48383307031247,159.494354C343.85054807031247,158.356869,347.3559570703125,157.788126,351.0000530703125,157.788122C354.64415707031253,157.788124,358.1495670703125,158.356869,361.5162730703125,159.494354C364.8829960703125,160.631844,367.85473607031247,162.251488,370.4315030703125,164.353283C373.0082700703125,166.455086,374.9939270703125,168.879051,376.3884580703125,171.625183C377.78300507031247,174.371319,378.4802700703125,177.230583,378.4802700703125,180.202976L414.9999820703125,180.202976Z" fill="currentColor"/>
+          </g>
+          <path d="M318,118.00000953674316C318,123.52285953674317,322.4771528,128.00000953674316,328.000001,128.00000953674316L334.35294,128.00000953674316C339.875788,128.00000953674316,344.352942,123.52285953674317,344.352942,118.00000953674316L344.352942,0.0000095367431640625L328.000001,0.0000095367431640625C322.4771528,0.0000095367431640625,318,4.477162336743164,318,10.000009536743164L318,118.00000953674316Z" fill="currentColor"/>
+          <rect x="419.6470642089844" y="90.83871459960938" width="26.352941513061523" height="37.16128921508789" rx="10" fill="currentColor"/>
+          <path d="M419.6470642089844,42.05636753674317C419.6470642089844,49.384588536743166,427.26892280898437,54.223833536743165,433.9010182089844,51.106443536743164L440.2539592089844,48.12027153674316C443.7610682089844,46.47176953674317,446.00000620898436,42.945417536743165,446.00000620898436,39.070192536743164L446.00000620898436,10.000010536743163C446.00000620898436,4.477162336743164,441.5228522089844,0.0000095367431640625,436.00000420898436,0.0000095367431640625L419.6470642089844,0.0000095367431640625L419.6470642089844,42.05636753674317Z" fill="currentColor"/>
+          <path transform="matrix(0.6737539768218994,-0.7389557957649231,0.6737539768218994,0.7389557361602783,91.44561148665503,245.44365734610307)" d="M324.5751543045044,31.789425642822266L324.5751543045044,95.69459164282226C324.5751543045044,101.21744164282227,329.0523071045044,105.69459164282226,334.5751563045044,105.69459164282226L342.3922243045044,105.69459164282226C347.8522573045044,105.69459164282226,352.3029623045044,101.31502964282227,352.3909273045044,95.85570164282227L353.5899723045044,21.440677642822266L334.3926516045044,21.791092042822264C328.94185300450437,21.890587062822267,324.5751543045044,26.337720442822267,324.5751543045044,31.789425642822266Z" fill="currentColor"/>
+          <path transform="matrix(0.6737539768218994,0.7389557361602783,-0.6737539768218994,0.7389557957649231,136.9870166037689,-310.2791530349929)" d="M419.88868713378906,0.000003337860107421875L421.17439833378904,75.4558753378601C421.26735833378905,80.91151033786011,425.7165179337891,85.2855103378601,431.1729471337891,85.2855103378601L438.9974021337891,85.2855103378601C444.5202501337891,85.2855103378601,448.9974041337891,80.80836033786011,448.9974041337891,75.2855103378601L448.9974041337891,10.518874337860108C448.9974041337891,5.101008937860107,444.68283813378906,0.6685379778601074,439.26693913378904,0.5225069478601074L419.88868713378906,0.000003337860107421875Z" fill="currentColor"/>
+          <path d="M593,39.6875C593,34.42461,591.68058,29.362026,589.04173,24.49975C586.402893,19.637476,582.6455,15.345626,577.769547,11.624201C572.8936,7.9027767,567.270264,5.0350547,560.899536,3.0210342C554.528809,1.0070102,547.89563,0,541,0C534.104374,0.0000025431316,527.471195,1.0070127,521.100464,3.0210304C514.729733,5.0350513,509.106392,7.9027739,504.23044600000003,11.624199C499.354504,15.345626,495.5971107,19.637476,492.958271,24.499752C490.3194225,29.362026,489,34.42461,489,39.6875L520.963188,39.6875C520.963188,37.659588,521.471592,35.708855,522.4884,33.835304C523.505207,31.961758,524.953018,30.30801,526.831833,28.874058C528.710648,27.440105,530.8774530000001,26.335106,533.3322450000001,25.559057C535.787033,24.78301,538.342953,24.394985,540.999996,24.394983C543.657043,24.394985,546.212963,24.783009,548.667751,25.559057C551.122543,26.335108,553.289345,27.440109,555.1681590000001,28.874058C557.046974,30.30801,558.494781,31.961761,559.511589,33.835308C560.528404,35.708855,561.036804,37.659588,561.036804,39.6875L593,39.6875Z" fill="currentColor"/>
+          <path d="M489,67.34374775C489,72.94428275,489.011337519,75.80785775,490.116182,77.93932674999999C491.0671661,79.77396775,492.5697849,81.27658475,494.4044247,82.22756975C496.5358925,83.33241675,499.399467,83.34374975,505.000002,83.34374975L521,83.34374975L521,39.68749995L505,36.21484375L489,39.68749995L489,67.34374775Z" fill="currentColor"/>
+          <path d="M489 101.28125C489 95.75840250169206 493.47715250169205 91.28125 499 91.28125L511 91.28125C516.5228474983079 91.28125 521 95.75840250169206 521 101.28125L521 117C521 122.52284749830794 516.5228474983079 127 511 127L499 127C493.47715250169205 127 489 122.52284749830794 489 117Z" fill="currentColor"/>
+          <path d="M561 101.28125C561 95.75840250169206 565.4771525016921 91.28125 571 91.28125L583 91.28125C588.5228474983079 91.28125 593 95.75840250169206 593 101.28125L593 117C593 122.52284749830794 588.5228474983079 127 583 127L571 127C565.4771525016921 127 561 122.52284749830794 561 117Z" fill="currentColor"/>
+          <path d="M561,83.34375L576.999998,83.34375C582.600533,83.34375,585.464108,83.33241699999999,587.595575,82.22757C589.430216,81.276585,590.932835,79.773968,591.883818,77.93932699999999C592.988661,75.80785800000001,593,72.944283,593,67.34375L593,39.6875L577,35.71875L561,39.6875L561,83.34375Z" fill="currentColor"/>
+          <path d="M489,67.3437481C489,72.944283,489.011336684,75.807858,490.116182,77.939325C491.0671661,79.773964,492.5697849,81.276583,494.4044247,82.227568C496.5358925,83.332413,499.399467,83.34375,505,83.34375L577,83.34375C582.600533,83.34375,585.464104,83.332413,587.5955730000001,82.227568C589.43021,81.276583,590.9328399999999,79.773964,591.88382,77.939325C592.98866,75.807856,593,72.944283,593,67.3437481L593,59.53125L489,59.53125L489,67.3437481Z" fill="currentColor"/>
+        </svg>
+      </a>
+      <nav class="nav-links">
+        <a href="#cards">组件</a>
+        <a href="#panel">数据</a>
+        <a href="#tokens">令牌</a>
+      </nav>
+      <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+        <svg id="iconTheme" viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 10a2 2 0 0 1 0 4 2 2 0 0 1 0-4zm0-16a2 2 0 0 1 0 4 2 2 0 0 1 0-4zm9 7a2 2 0 0 1 0 4 2 2 0 0 1 0-4zM3 9a2 2 0 0 1 0 4 2 2 0 0 1 0-4z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Hero -->
+    <section class="hero">
+      <h1>一套令牌<br />驱动两种主题。</h1>
+      <p>基于提炼出的「Luma・Gran 流光」设计风格：Fluent / 云母 / 极简微光。本页仅引用一份 CSS 变量，深色浅色自动切换。</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary">开始体验</button>
+        <button class="btn btn-ghost">了解更多</button>
+      </div>
+    </section>
+
+    <!-- 组件卡片（3D 倾斜 + 光晕跟随） -->
+    <section id="cards">
+      <h2 class="sec-title">组件 · 3D 卡片</h2>
+      <div class="grid" id="cardGrid">
+        <div class="card glow tilt-card">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l9 5v10l-9 5-9-5V7z"/></svg></div>
+          <h3>云母容器</h3>
+          <p>半透明云母玻璃，模糊并提亮底下的内容，随深浅主题自动通透；悬停时微光沿光标泛开。</p>
+          <div class="meta">Mica · Acrylic</div>
+        </div>
+        <div class="card glow tilt-card">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M13 3L4 14h7l-1 7 9-11h-7z"/></svg></div>
+          <h3>极简微光</h3>
+          <p>纯白强调色，仅用极淡辉光做反馈，克制而不抢构图。</p>
+          <div class="meta">Glow · Accent</div>
+        </div>
+        <div class="card glow tilt-card">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 3 1.8 5 3 6v5h8v-5c1.2-1 3-3 3-6a7 7 0 0 0-7-7z"/></svg></div>
+          <h3>非线性动效</h3>
+          <p>Fluent 标准缓动 + 弹簧回弹，交互手感统一而流畅。</p>
+          <div class="meta">cubic-bezier(.1,.9,.2,1)</div>
+        </div>
+      </div>
+
+      <h2 class="sec-title" style="margin-top:var(--space-16)">标签 · 筛选</h2>
+      <div class="chips" id="chips">
+        <span class="chip active">全部</span>
+        <span class="chip">UI 设计</span>
+        <span class="chip">平面设计</span>
+        <span class="chip">Web 应用</span>
+        <span class="chip">文档编写</span>
+      </div>
+
+      <h2 class="sec-title" style="margin-top:var(--space-16)">分段 Tab 栏</h2>
+      <p style="color:var(--text-secondary);max-width:560px;margin-bottom:var(--space-4)">把鼠标移入 Tab / 按钮 / 链接 / 开关：鼠标球变为<b style="color:var(--text-primary)">比控件略大的选中框</b>并粘滞吸附，外发光随框溢出控件边缘、不被控件的 overflow 裁剪。</p>
+      <div class="segmented" id="segmented">
+        <button class="tab active">概览</button>
+        <button class="tab">设计</button>
+        <button class="tab">开发</button>
+        <button class="tab">发布</button>
+      </div>
+    </section>
+
+    <!-- 数据面板 -->
+    <section id="panel">
+      <div class="panel glow">
+        <h2>运行数据</h2>
+        <p style="color:var(--text-secondary)">玻璃拟态面板，半透明背景跟随主题自动通透。</p>
+        <div class="stats" style="margin-top:var(--space-6)">
+          <div class="stat"><b>99.9%</b><span>可用率</span></div>
+          <div class="stat"><b>128</b><span>组件</span></div>
+          <div class="stat"><b>2</b><span>主题</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 令牌引用说明 -->
+    <section id="tokens">
+      <h2 class="sec-title">令牌引用</h2>
+      <div class="panel glow"><pre style="white-space:pre-wrap;color:var(--text-secondary);font-size:var(--fs-small)">本示例页仅 &lt;link&gt; 了一份 <b style="color:var(--text-primary)">docs/design-tokens.css</b>，
+其中的 :root（深色）与 [data-theme="light"]（浅色）变量驱动了全部颜色/排版/间距。
+无需写两套布局，主题切换只改一个属性值 + 一个水波纹。</pre></div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <span>© 2026 Luma・Gran 流光 设计系统</span>
+    <span>Fluent · Mica · 极简微光</span>
+  </footer>
+
+  <!-- 鼠标球（三态：normal / card / button） -->
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true">
+    <div class="cursor-glow-inner" id="cursorGlowInner"></div>
+  </div>
+
+  <script>
+    /* 主题切换：水波纹动画（600ms 扩展 → 切换 → 300ms 淡出） */
+    const themeToggle = document.getElementById("themeToggle");
+    themeToggle.addEventListener("click", () => {
+      const root = document.documentElement;
+      const toDark = root.getAttribute("data-theme") === "light";
+      const rect = themeToggle.getBoundingClientRect();
+      const r = new DOMRect(
+        rect.left + rect.width / 2 - 1, rect.top + rect.height / 2 - 1, 2, 2
+      );
+      const cover = Math.hypot(window.innerWidth, window.innerHeight) * (r.width ? 2 : 2);
+      const ripple = document.createElement("div");
+      ripple.className = "theme-ripple";
+      const size = Math.max(window.innerWidth, window.innerHeight) * 1.5;
+      ripple.style.cssText = `left:${r.x}px;top:${r.y}px;width:${size}px;height:${size}px;margin-left:${-(size/2)}px;margin-top:${-(size/2)}px;`;
+      document.body.appendChild(ripple);
+      requestAnimationFrame(() => requestAnimationFrame(() => ripple.style.transform = "scale(1)"));
+      setTimeout(() => root.setAttribute("data-theme", toDark ? "dark" : "light"), 300);
+      setTimeout(() => { ripple.style.opacity = "0"; }, 620);
+      setTimeout(() => ripple.remove(), 1000);
+    });
+
+    /* 3D 卡片：最大倾斜 18°，LERP 0.15，停止阈值 0.05° */
+    document.querySelectorAll(".tilt-card").forEach((card) => {
+      const target = { rx: 0, ry: 0 }, cur = { rx: 0, ry: 0 };
+      card.addEventListener("mousemove", (e) => {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        target.rx = -py * 18;
+        target.ry = px * 18;
+      });
+      card.addEventListener("mouseleave", () => { target.rx = 0; target.ry = 0; });
+      (function loop() {
+        cur.rx += (target.rx - cur.rx) * 0.15;
+        cur.ry += (target.ry - cur.ry) * 0.15;
+        if (Math.abs(target.rx - cur.rx) > 0.05 || Math.abs(target.ry - cur.ry) > 0.05) {
+          card.style.transform = `perspective(900px) rotateX(${cur.rx}deg) rotateY(${cur.ry}deg)`;
+        }
+        requestAnimationFrame(loop);
+      })();
+    });
+
+    /* 光晕跟随：为卡片/按钮写 --mouse-x/--mouse-y（像素级） */
+    document.addEventListener("mousemove", (e) => {
+      const el = e.target.closest(".glow, .btn");
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty("--mouse-x", `${e.clientX - r.left}px`);
+      el.style.setProperty("--mouse-y", `${e.clientY - r.top}px`);
+    });
+
+    /* chips 简单选中态 */
+    document.getElementById("chips").addEventListener("click", (e) => {
+      if (!e.target.classList.contains("chip")) return;
+      document.querySelectorAll("#chips .chip").forEach((c) => c.classList.remove("active"));
+      e.target.classList.add("active");
+    });
+
+    /* 分段 Tab 栏选中态 */
+    document.getElementById("segmented").addEventListener("click", (e) => {
+      if (!e.target.classList.contains("tab")) return;
+      document.querySelectorAll("#segmented .tab").forEach((t) => t.classList.remove("active"));
+      e.target.classList.add("active");
+    });
+
+    /* 点击大板块：光影从点击点扩散到整个板块（水波式），凭 overflow 裁切在板块内 */
+    document.addEventListener("click", (e) => {
+      const el = e.target.closest(".card, .panel");
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const ripple = document.createElement("div");
+      ripple.className = "ripple";
+      const size = Math.max(r.width, r.height) * 2.4;
+      ripple.style.left = (e.clientX - r.left) + "px";
+      ripple.style.top = (e.clientY - r.top) + "px";
+      ripple.style.width = size + "px";
+      ripple.style.height = size + "px";
+      el.appendChild(ripple);
+      requestAnimationFrame(() => requestAnimationFrame(() => ripple.classList.add("pop")));
+      setTimeout(() => ripple.remove(), 700);
+    });
+
+    /* ===== 鼠标球三态状态机（normal 圆 / card 隐藏 / button 粘滞形变） ===== */
+    const glow = document.getElementById("cursorGlow");
+    const inner = document.getElementById("cursorGlowInner");
+    const fine = window.matchMedia("(pointer: coarse)").matches;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (glow && inner && !fine && !reduce) {
+      document.body.classList.add("sel-active");
+      /* 大板块：三类卡片 + 数据面板等玻璃大块 → 移入即整球隐藏 */
+      /* 可操作组件 → 进入即"选中框粘滞"：Tab 栏、导航、按钮、chip、开关、Logo、一切链接 */
+      const BTN_SEL = "button, .tab, .chip, .theme-toggle, .nav-links a, .logo, a[href]";
+      const CARD_SEL = ".card.glow, .panel";
+      let mx = innerWidth / 2, my = innerHeight / 2, gx = mx, gy = my;
+      let mode = "normal", btnEl = null, btnRect = null, stickX = 0, stickY = 0, btnPad = 0;
+
+      /* 常驻跟随循环：normal 线性 1:1；button 缓动吸附到按钮中心 */
+      (function loop() {
+        if (mode === "normal") { gx = mx; gy = my; }
+        else if (mode === "button" && btnRect) {
+          const tx = btnRect.left + btnRect.width / 2 + stickX;
+          const ty = btnRect.top + btnRect.height / 2 + stickY;
+          gx += (tx - gx) * 0.3;
+          gy += (ty - gy) * 0.3;
+        }
+        glow.style.transform = `translate(${gx}px, ${gy}px)`;
+        requestAnimationFrame(loop);
+      })();
+
+      addEventListener("mousemove", (e) => {
+        mx = e.clientX; my = e.clientY;
+        if (mode === "button" && btnRect && btnEl) {
+          const cx = btnRect.left + btnRect.width / 2, cy = btnRect.top + btnRect.height / 2;
+          stickX = (e.clientX - cx) * 0.2;
+          stickY = (e.clientY - cy) * 0.2;
+          btnEl.style.translate = `${stickX}px ${stickY}px`;
+          /* 框内辉光跟随鼠标：--spot 相对选中框左上角（框中可超出实际鼠标位，仅限框内展示） */
+          inner.style.setProperty("--spot-x", (e.clientX - (btnRect.left - btnPad)) + "px");
+          inner.style.setProperty("--spot-y", (e.clientY - (btnRect.top - btnPad)) + "px");
+        }
+      });
+
+      document.addEventListener("mouseover", (e) => {
+        const btn = e.target.closest(BTN_SEL);
+        if (btn) {
+          if (mode !== "button" || btnEl !== btn) enterButton(btn);
+          glow.classList.remove("card");
+          return;
+        }
+        if (e.target.closest(CARD_SEL)) {
+          if (mode === "button") resetButton();
+          mode = "card";
+          glow.classList.add("card");
+        }
+      });
+
+      document.addEventListener("mouseout", (e) => {
+        if (mode === "button" && btnEl) {
+          if (e.relatedTarget && (btnEl.contains(e.relatedTarget) || e.relatedTarget.closest(BTN_SEL))) return;
+          resetButton();
+        } else if (mode === "card") {
+          const card = e.target.closest(CARD_SEL);
+          if (e.relatedTarget && (card && card.contains(e.relatedTarget) || e.relatedTarget.closest(CARD_SEL))) return;
+          mode = "normal";
+          glow.classList.remove("card");
+        }
+      });
+
+      /* 选中框外扩仅用于"无背景且无边框"的控件（纯文字链接 / 透明按钮 / logo）；
+         自身带背景或框线的控件已有视觉边界，选中框贴合控件本身尺寸 */
+      function hasVisualBoundary(el) {
+        const cs = getComputedStyle(el);
+        const hasBorder = ["Top", "Right", "Bottom", "Left"]
+          .some((s) => parseFloat(cs["border" + s + "Width"]) > 0);
+        const bg = cs.backgroundColor;
+        const alpha = bg.startsWith("rgba") ? parseFloat(bg.split(",")[3]) : (bg !== "transparent" ? 1 : 0);
+        const bgSolid = alpha > 0;
+        const bgImg = cs.backgroundImage !== "none";
+        return hasBorder || bgSolid || bgImg;
+      }
+      function enterButton(btn) {
+        if (btnEl && btnEl !== btn) btnEl.style.translate = "";
+        mode = "button"; btnEl = btn;
+        btnRect = btn.getBoundingClientRect();
+        stickX = 0; stickY = 0;
+        const rr = getComputedStyle(btn).borderRadius;
+        const w = btnRect.width, h = btnRect.height;
+        /* Tab 栏：选中/未选中框都贴合 tab 实际尺寸（与选中态等高），保持一致不再放大；
+           其他控件按"无背景且无框线才外扩，有背景/框线贴合" */
+        const PAD = btn.classList.contains("tab") ? 0 : (hasVisualBoundary(btn) ? 0 : 4);
+        btnPad = PAD;
+        inner.style.width = (w + PAD * 2) + "px";
+        inner.style.height = (h + PAD * 2) + "px";
+        /* 若控件本身是圆/胶囊则跟随，否则回退小圆角方角 */
+        if (rr && rr !== "0px") inner.style.borderRadius = rr;
+        else inner.style.borderRadius = (w === h && Math.max(w, h) <= 40) ? "50%" : "8px";
+        inner.style.background = "rgba(128, 128, 128, 0.10)";
+        inner.style.borderColor = "rgba(128, 128, 128, 0.42)";
+        /* 选中框仅保留描边轮廓；辉光在框内 ::after 跟随鼠标，裁切在圆角内 */
+        inner.style.boxShadow = "0 0 0 1px rgba(128,128,128,0.35)";
+        /* 光晕起始居中：--spot 相对选中框左上角；--spot-r 辉光半径跟随框尺寸，小控件不显过大 */
+        inner.style.setProperty("--spot-x", (w / 2 + PAD) + "px");
+        inner.style.setProperty("--spot-y", (h / 2 + PAD) + "px");
+        inner.style.setProperty("--spot-r", (Math.max(w, h) * 1.3) + "px");
+        glow.classList.add("button");
+      }
+      function resetButton() {
+        if (btnEl) btnEl.style.translate = "";
+        btnEl = null; btnRect = null;
+        inner.style.width = ""; inner.style.height = ""; inner.style.borderRadius = "";
+        inner.style.background = ""; inner.style.borderColor = "";
+        inner.style.boxShadow = "";
+        inner.style.removeProperty("--spot-x"); inner.style.removeProperty("--spot-y");
+        inner.style.removeProperty("--spot-r");
+        glow.classList.remove("button");
+        mode = "normal";
+      }
+    }
+  </script>
+</body>
+</html>
