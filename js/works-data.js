@@ -99,4 +99,13 @@ const worksData = [
     image: "assets/grname.png",
     link: "https://grantpome.github.io/GRName/",
   },
+  {
+    id: 12,
+    title: "Luma・Gran 流光 — 设计系统",
+    date: "2026/08/30",
+    tag: "设计系统",
+    desc: "以 Windows Fluent + 极简微光为精神的可复用设计系统：双主题设计令牌、鼠标球三态交互、3D 卡片、主题水波纹、板块点击水波等完整交互演示与规范文档，含可在线访问的示例页。",
+    image: "assets/work-luma.jpg",
+    link: "https://grantpome.github.io/luma-gran-liuguang/examples/luma-gran-showcase.html",
+  },
 ];
